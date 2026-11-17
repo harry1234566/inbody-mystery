@@ -28,7 +28,7 @@ const POSTERS = {
   move:{t:'모두에게 같은 권고', cap:'주 150분 유산소 + 주 2일 근력', src:'WHO 2020', draw:(c,x,y,w,h)=>{
     pPerson(c, x + w*0.3, y + h*0.95, h*0.75, PK.green); c.fillStyle = PK.blue; const dx = x + w*0.72, dy = y + h*0.55; c.fillRect(dx - w*0.12, dy - h*0.015, w*0.24, h*0.03); [-1,1].forEach(sd=>{ rr(c, dx + sd*w*0.12 - w*0.04, dy - h*0.08, w*0.08, h*0.16, 6); c.fill(); });
     pText(c, '150분', x + w*0.3, y + h*0.08, h*0.12, PK.green, 800); pText(c, '주 2일', x + w*0.72, y + h*0.3, h*0.12, PK.blue, 800); }},
-  ba_fat:{t:'BIA 체지방률은 더 낮게', cap:'DXA보다 평균 남 5.2·여 6.5%p 낮음 (±6%p)', src:'본 연구 · Bland·Altman 1986', draw:(c,x,y,w,h)=>{
+  ba_fat:{t:'BIA 체지방률은 더 낮게', cap:'DXA보다 평균 남 5.4·여 6.6%p 낮음 (가중, ±6%p)', src:'본 연구 · Bland·Altman 1986', draw:(c,x,y,w,h)=>{
     c.strokeStyle = '#c9c2b0'; c.lineWidth = 2; c.strokeRect(x + w*0.05, y, w*0.9, h*0.9); const my = y + h*0.55;
     c.strokeStyle = PK.coral; c.lineWidth = 4; c.beginPath(); c.moveTo(x + w*0.05, my); c.lineTo(x + w*0.95, my); c.stroke(); c.setLineDash([8,6]); c.lineWidth = 2; [-1,1].forEach(sd=>{ c.beginPath(); c.moveTo(x + w*0.05, my + sd*h*0.28); c.lineTo(x + w*0.95, my + sd*h*0.28); c.stroke(); }); c.setLineDash([]);
     c.strokeStyle = '#8a948d'; c.beginPath(); c.moveTo(x + w*0.05, y + h*0.2); c.lineTo(x + w*0.95, y + h*0.2); c.stroke(); pText(c, '0 (차이 없음)', x + w*0.8, y + h*0.14, h*0.05, PK.mut, 500);
@@ -43,7 +43,7 @@ const POSTERS = {
   hidden:{t:'숨은 비만의 혈액 신호', cap:'BIA로 놓친 DXA 상위군: HDL↓ · 중성지방↑', src:'본 연구 (나이·질환 보정)', draw:(c,x,y,w,h)=>{
     const base = y + h*0.85; [['HDL',0.55,PK.blue,'↓'],['중성지방',0.8,PK.coral,'↑']].forEach(([t,v,col,ar],i)=>{ const bx = x + w*(0.18 + i*0.42); c.fillStyle = '#e1dccf'; c.fillRect(bx, base - h*0.7, w*0.22, h*0.7); c.fillStyle = col; c.fillRect(bx, base - h*0.7*v, w*0.22, h*0.7*v);
       pText(c, ar, bx + w*0.11, base - h*0.7*v - h*0.08, h*0.14, col, 800); pText(c, t, bx + w*0.11, base + h*0.07, h*0.075, PK.ink, 700); }); }},
-  ba_muscle:{t:'BIA 근육은 더 넉넉하게', cap:'근육지수 BIA가 DXA보다 평균 약 1 kg/m² 높음', src:'본 연구 · Bland·Altman 1986', draw:(c,x,y,w,h)=>{
+  ba_muscle:{t:'BIA 근육은 더 넉넉하게', cap:'근육지수 BIA가 DXA보다 평균 약 1 kg/m² 높음 (가중)', src:'본 연구 · Bland·Altman 1986', draw:(c,x,y,w,h)=>{
     const base = y + h*0.85; [['BIA',0.8,PK.blue],['DXA',0.6,PK.green]].forEach(([t,v,col],i)=>{ const bx = x + w*(0.2 + i*0.38); c.fillStyle = col; rr(c, bx, base - h*0.75*v, w*0.24, h*0.75*v, 8); c.fill(); pText(c, t, bx + w*0.12, base + h*0.07, h*0.08); });
     pText(c, '+1', x + w*0.5, y + h*0.12, h*0.13, PK.coral, 800); }},
   grip:{t:'근육은 양보다 힘', cap:'악력 · 의자 일어서기 먼저 확인', src:'AWGS 2025 · EWGSOP2 2019', draw:(c,x,y,w,h)=>{

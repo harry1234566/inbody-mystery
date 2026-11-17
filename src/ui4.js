@@ -21,14 +21,16 @@ function infoBody(full){
     <dl class="kv">${row('키', `${f1(v.ht)} cm`)}${row('체중', `${f1(v.wt)} kg`)}${row('BMI', `${f1(bmi)} kg/m²`, 'ranges')}${Number.isFinite(v.wc) ? row('허리둘레', `${f1(v.wc)} cm`, 'ranges') : row('허리둘레', '입력 안 함')}
       ${row('근육지수', `${f1(smi)} kg/m²`, 'relative')}${row('체지방률', `${f1(v.pbf)} %`, 'relative')}${Number.isFinite(v.pha) ? row('위상각', `${f1(v.pha)}°`, 'phase') : ''}${Number.isFinite(v.ecw) ? row('세포외수분비', `${v.ecw}`, 'phase') : ''}</dl>
     <p class="small"><b>캐릭터</b> 몸 너비 ← BMI, 배 ← 허리둘레/키, 키 ← 입력한 키.${healthy ? ' 탈출 후에는 실천으로 만들 "미래의 나" 모습으로 바뀌었어요(상징).' : ''} 체형은 건강 상태를 뜻하지 않아요. ${statBtn('ranges')}</p>
-    <p class="small"><b>데이터의 의미</b> 모두 BIA(인바디) 값이에요. 같은 사람을 DXA로 재면 근육지수는 약 1 kg/m² 낮게, 체지방률은 5~6%p 높게 나왔어요. ${statBtn('ba')}</p>
-    ${full && result ? `<h3>내 수치는 어디쯤?</h3>${myGauges(current, result)}` : ''}
+    <p class="small"><b>데이터의 의미</b> 모두 BIA(인바디) 값이에요. 같은 사람을 DXA로 재면 근육지수는 약 1 kg/m² 낮게(가중 평균 남 0.96, 여 1.01), 체지방률은 약 5.4~6.6%p 높게 나왔어요. ${statBtn('ba')}</p>
+    <p class="small"><b>자료</b> ${DATA_INFO.source}, 40세 이상 ${DATA_INFO.n.toLocaleString()}명, 복합표본 가중치 적용. 단위: 키·허리둘레 cm, 체중 kg, BMI·근육지수 kg/m², 체지방률 %. ${statBtn('datainfo')}</p>
+    <p class="small"><b>주의</b> 수치의 위치는 상대적 위치일 뿐 건강 상태를 확정하지 않아요.</p>
+    ${full && result ? `<h3>내 수치는 어디쯤?</h3>${myGauges(current, result)}${posNotice()}` : ''}
     <div class="acts"><button class="btn ghost sm" data-act="ranges">내 수치 범위</button>${result ? '<button class="btn ghost sm" data-act="result">결과·계산 과정</button>' : ''}</div>`;
 }
 function bindInfo(root){ bindStats(root); bindRefs(root);
   root.querySelectorAll('[data-act]').forEach(b=>b.onclick = ()=>{ if (b.dataset.act==='result'){ const s = stage; showResult(); } else openRanges(); }); }
 function openRanges(){ if (!result && current) result = null; const saved = pushSheet(); const r = result || predict(current);
-  openSheet(`<p class="eyebrow">MY NUMBERS</p><h2>내 수치는 어디쯤?</h2>${myGauges(current, r)}${STATS.ranges.html()}${refsHTML(STATS.ranges.refs)}`, {close:true, wide:true, onClose: saved ? ()=>popSheet(saved) : null}); }
+  openSheet(`<p class="eyebrow">MY NUMBERS</p><h2>내 수치는 어디쯤?</h2>${myGauges(current, r)}${STATS.ranges.html()}${refsHTML([1,28,7,10,27])}`, {close:true, wide:true, onClose: saved ? ()=>popSheet(saved) : null}); }
 let infoOpen = false;
 function renderInfo(){
   const c = $('infoCard'); if (c.hidden) return;
@@ -53,6 +55,8 @@ function reportText(withVals){
   L.push('', '■ 우리 사회의 4가지 문제'); ISSUES.forEach(x=>L.push(`  ${x.k} ${x.name}: ${x.why}`));
   L.push('', '■ 보건소 3단계 실천 계획'); LEVELS.forEach(lv=>L.push(`  ${lv.h}: ${lv.items[0][0]}`));
   if (pledged.size && roomKey){ L.push('', '■ 나의 다짐'); [...pledged].forEach(i=>L.push(`  - ${ROOMS[roomKey].pledges[i]}`)); }
+  L.push('', '■ 자료와 기준', `  출처: ${DATA_INFO.source}`, `  대상: 40세 이상 BIA·DXA 동시 측정 ${DATA_INFO.n.toLocaleString()}명(남 ${DATA_INFO.nSex[1].toLocaleString()}, 여 ${DATA_INFO.nSex[2].toLocaleString()})`, `  가중치: ${DATA_INFO.weight}`, '  단위: 키·허리둘레 cm, 체중 kg, BMI·근육지수 kg/m², 체지방률 %', '  기준 문헌: AWGS 2025·2019(근육), 대한비만학회 2022(BMI·허리둘레), Bland·Altman 1986, Landis·Koch 1977, TRIPOD+AI 2024');
+  L.push('', '■ 꼭 읽어 주세요', '  ' + POS_NOTICE.replace(/<[^>]+>/g,''));
   L.push('', CONSULT, '', '근거: 국민건강영양조사 2024 원시자료 분석(집현전), Kyle 2004, Bland·Altman 1986, WHO 2020, AWGS 2025, 대한비만학회 2022 등', `다시 해 보기: ${shareUrl()}`, 'TEAM 집현전 · 성균관대학교 2026-2 융합연구학점제');
   return L.join('\n');
 }
@@ -68,6 +72,8 @@ async function reportImage(withVals){
   T('내가 모은 열쇠에 새겨진 제안', 32, 800, '#2f6f5e', 8); cards.forEach(c=>T(`· [${c.lvl}] ${c.text}`, 25, 500, '#1f2b26', 6)); blocks[blocks.length-1].gap = 22;
   T('우리 사회의 4가지 문제', 32, 800, '#2f6f5e', 8); ISSUES.forEach(x=>T(`${x.k} ${x.name} — ${x.why}`, 24, 500, '#1f2b26', 6)); blocks[blocks.length-1].gap = 22;
   if (pledged.size && roomKey){ T('나의 다짐', 32, 800, '#2f6f5e', 8); [...pledged].forEach(i=>T(`✓ ${ROOMS[roomKey].pledges[i]}`, 28, 600, '#1f2b26', 6)); blocks[blocks.length-1].gap = 22; }
+  T('자료와 기준', 32, 800, '#2f6f5e', 8); T(`출처: ${DATA_INFO.source} · 대상: 40세 이상 BIA·DXA 동시 측정 ${DATA_INFO.n.toLocaleString()}명(남 ${DATA_INFO.nSex[1].toLocaleString()}, 여 ${DATA_INFO.nSex[2].toLocaleString()}) · 가중치: 복합표본(층·집락·wt_itvex) · 단위: 키·허리둘레 cm, 체중 kg, BMI·근육지수 kg/m², 체지방률 % · 기준 문헌: AWGS 2025·2019, 대한비만학회 2022, Bland·Altman 1986, TRIPOD+AI 2024`, 22, 500, '#1f2b26', 14);
+  T(POS_NOTICE.replace(/<[^>]+>/g,''), 23, 600, '#b8573c', 18);
   T(CONSULT, 24, 500, '#a86a10', 10);
   // 높이 계산
   let y = 330; for (const b of blocks){ g.font = `${b.wt} ${b.size}px ${FONT}`; b.lines = wrapLines(g, b.t, W - P*2); y += b.lines.length * b.size * 1.42 + b.gap; }
@@ -88,6 +94,7 @@ function printReport(withVals){
   $('printArea').innerHTML = `<h1>인바디 미스터리 · 집현전 보건소 결과</h1><p>${R.no} · ${R.name} (교육용 분류, 진단 아님)</p>
     <p>DXA로 쟀다면 분류가 바뀔 확률: 근육 ${pctTxt(r.pm)}, 체지방 ${pctTxt(r.pf)}</p>
     ${withVals ? `<h2>내 수치는 어디쯤?</h2>${myGauges(current, r)}<h2>계산 과정</h2>${procHTML(current, r)}` : ''}
+    <h2>자료 출처 · 대상자 수 · 가중치 · 단위 · 기준 문헌</h2>${dataInfoTable()}<p><b>꼭 읽어 주세요.</b> ${POS_NOTICE}</p>
     <h2>내가 모은 열쇠에 새겨진 제안</h2><ul>${cards.map(c=>`<li>[${c.lvl}] ${esc(c.text)}</li>`).join('')}</ul>
     <h2>우리 사회의 4가지 문제</h2><ul>${ISSUES.map(x=>`<li><b>${x.k} ${x.name}</b> ${x.fact} ${x.why}</li>`).join('')}</ul>
     <h2>보건소 3단계 실천 계획</h2>${LEVELS.map(L=>`<h3>${L.h}</h3><ul>${L.items.map(([t])=>`<li>${t}</li>`).join('')}</ul>`).join('')}

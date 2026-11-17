@@ -18,7 +18,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.model_selection import RepeatedStratifiedKFold
 from statsmodels.stats.contingency_tables import mcnemar
 import statsmodels.api as sm
-PLOT_DIR='/tmp/_p'; os.makedirs(PLOT_DIR,exist_ok=True)
+PLOT_DIR=os.path.join(os.getcwd(),'_plots_tmp'); os.makedirs(PLOT_DIR,exist_ok=True)
 import io, contextlib
 with contextlib.redirect_stdout(io.StringIO()): exec(code)
 B=df[df.elig_all].copy(); W='wt_itvex'; w=B[W].values
@@ -39,7 +39,7 @@ for var,lab,unit in [('smi','근육지수','kg/m²'),('pbf','체지방률','%p')
     for ax,sx in zip(axs,[1,2]):
         m=(B.sex==sx).values; a=B.loc[m,'bia_'+var].values; d=B.loc[m,'dxa_'+var].values; wt=w[m]
         diff=a-d; mean=(a+d)/2; bias=wmean(diff,wt); sd=np.sqrt(wmean((diff-bias)**2,wt))
-        ax.scatter(mean,diff,s=4,alpha=.25,color=C[sx],lw=0)
+        ax.hexbin(mean,diff,gridsize=26,mincnt=5,cmap='Blues' if sx==1 else 'Oranges',linewidths=0.2,edgecolors='white')  # 개인 점 대신 칸 묶음, 5명 미만 칸 숨김
         ax.axhline(bias,color='#2f6f5e',lw=2); [ax.axhline(bias+k*1.96*sd,color='#2f6f5e',ls='--',lw=1) for k in [-1,1]]; ax.axhline(0,color='#888',lw=.8)
         ax.set_title(f'{SEX[sx]}성 (실선: 평균 차이, 점선: 95% 일치한계)',fontsize=9.5); ax.set_xlabel(f'두 기기 평균 {lab}',fontsize=9); style(ax)
         stats_out[f'ba_{var}_{sx}']=[round(bias,2),round(1.96*sd,2)]

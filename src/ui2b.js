@@ -76,15 +76,18 @@ function showResult(){
       <div class="small">나와 비슷한 사람 100명 중 약 ${per100(a.p)}명꼴(초록 점)이에요. 같은 성별·연령대에서 같은 BIA 분류였던 사람들은 평균 ${per100(a.avg)}명꼴(노란 테두리)이었어요.</div></div>`).join('')}
     <h3>내 수치는 어디쯤? ${statBtn('ranges','그래프 보는 법')}</h3>
     ${myGauges(current, result)}
+    ${dataInfoBox(result)}
+    ${result.ext && result.ext.length ? `<div class="posn warnx"><b>입력값 확인</b> 아래 값은 연구 자료의 대부분(가중 1~99%)이 있는 범위 밖이라, 확률은 참고로만 보세요.<ul class="facts">${result.ext.map(t=>`<li>${t}</li>`).join('')}</ul></div>` : ''}
     <h3>주요 판단 요인 ${statBtn('distance')} ${statBtn('shape','체형')}</h3><ul class="facts">${fs.map(t=>`<li>${t}</li>`).join('')}</ul>
     <h3>계산 과정 ${statBtn('model','모형 자세히')}</h3>${procHTML(current, result)}
     <div class="trust"><b>이 분류를 얼마나 믿을 수 있나요?</b><dl>
       <dt>목적</dt><dd>게임의 방을 정하기 위한 교육용 분류예요. 진단이나 검사 권고에 쓰지 않아요.</dd>
+      <dt>자료</dt><dd>${DATA_INFO.source}, 40세 이상 ${DATA_INFO.n.toLocaleString()}명(남 ${DATA_INFO.nSex[1].toLocaleString()}, 여 ${DATA_INFO.nSex[2].toLocaleString()}), 복합표본 가중치(wt_itvex) 적용. ${statBtn('datainfo')}</dd>
       <dt>적용 대상</dt><dd>40세 이상, InBody 970 측정값. 다른 기기나 연령에는 맞지 않을 수 있어요.</dd>
       <dt>기준</dt><dd>같은 성별·연령대 안의 상대적 위치(근육 하위 20%, 체지방 상위 20%). ${statBtn('relative')}</dd>
       <dt>성능</dt><dd>중첩 교차검증 AUC: 근육 0.89~0.92, 체지방 0.84, 반대 방향 0.70~0.81. 보정 기울기 0.85~0.98. ${statBtn('model')}</dd>
       <dt>불확실성</dt><dd>2024년 한 해 자료로 만든 모형이라 외부 검증은 아직이에요. 같은 조건의 사람도 실제 결과는 달라질 수 있어요.</dd></dl>
-      ${refsHTML([1,7,18,19,20])}</div>
+      ${refsHTML([1,28,7,18,19,20])}</div>
     <p class="say">${CONSULT}</p>
     <div class="row"><button class="btn" id="toRoomBtn">${stage==='consult' ? `조사 구역으로: ${R.no} · ${R.name}` : '닫기'}</button></div>`;
   openSheet(html, {close:stage!=='consult', wide:true}); hist('간호사', '예측 결과와 계산 과정', html);

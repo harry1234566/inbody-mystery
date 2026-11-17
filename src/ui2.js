@@ -19,7 +19,8 @@ function openConsent(){
     <div class="note" style="background:#fcefe9"><b>잠깐!</b> 심장박동기 등 삽입형 의료기기를 착용했다면 인바디를 측정하지 마세요(인바디 측정 유의사항). 이 체험은 예시 값으로 할 수 있어요.</div>
     <div class="box"><b>개인정보와 건강정보</b><ul class="facts">
       <li>입력값은 이 기기 안에서만 계산해요. 서버로 보내거나 저장하지 않고, 페이지를 닫으면 사라져요.</li>
-      <li>결과를 이메일·이미지로 받을 때는 내가 고른 경우에만 수치가 들어가요.</li></ul></div>
+      <li>결과를 이미지·PDF·텍스트로 저장할 때는 내가 고른 경우에만 수치가 들어가요. 이메일 전송은 없어요.</li></ul></div>
+    <div class="box"><b>비교에 쓰는 자료</b><ul class="facts"><li>${DATA_INFO.source}, 40세 이상 BIA·DXA 동시 측정 ${DATA_INFO.n.toLocaleString()}명(남 ${DATA_INFO.nSex[1].toLocaleString()}, 여 ${DATA_INFO.nSex[2].toLocaleString()}).</li><li>복합표본 가중치(층·집락·검진 가중치)를 적용해 대한민국 40세 이상을 대표하도록 계산했어요. ${statBtn('datainfo','자료 정보')}</li><li>결과에 나오는 내 위치는 상대적 위치일 뿐 건강 상태를 확정하지 않아요.</li></ul></div>
     <label class="check"><input type="checkbox" id="agree"> 위 내용을 확인했고, 체성분 정보를 이 체험에 쓰는 데 동의해요.</label>
     <div class="row"><button class="btn ghost" id="goDemo" disabled>예시 값으로 체험</button><button class="btn" id="goInput" disabled>내 결과지로 접수하기</button></div>`;
   openSheet(html, {close:true, onClose:()=>{ if (stage==='intro') introHint(); }});
@@ -54,7 +55,7 @@ function renderAv(){
     const bb = document.createElement('div'); bb.className = 'note'; const whtr = Number.isFinite(current.wc) ? (current.wc/current.ht).toFixed(2) : '-';
     bb.innerHTML = `<b>내 입력이 캐릭터에 반영된 방식</b><br>몸 너비 ← BMI ${f1(current.wt/((current.ht/100)**2))} · 배 ← 허리둘레/키 ${whtr} · 키 ← ${current.ht} cm`; o.appendChild(bb);
     o.appendChild(swRow('체형 반영', [[true,'키·체중·허리둘레 반영'],[false,'기본 체형']], 'bodyOn'));
-    const p = document.createElement('p'); p.className = 'small'; p.innerHTML = '체형은 BMI와 허리둘레/키 비율을 범주 없이 연속적으로 비춰요. 체형으로 사람을 평가하지 않도록 중립적으로 표현했고, 체험이 끝나도 바뀌지 않아요. ' + refTag([21]); o.appendChild(p); bindRefs(p);
+    const p = document.createElement('p'); p.className = 'small'; p.innerHTML = '체형은 BMI와 허리둘레/키 비율을 범주 없이 연속적으로 비춰요. 체형으로 사람을 평가하지 않도록 중립적으로 표현했어요. 체형은 건강 상태를 뜻하지 않아요. 방을 탈출하면 꾸준한 실천을 상징하는 ‘미래의 나’ 모습으로 바뀌어요. ' + refTag([21]); o.appendChild(p); bindRefs(p);
     o.appendChild(swRow('피부색', SKINS, 'skin', 'color'));
   }
   if (avTab==='face'){ o.appendChild(swRow('얼굴형', FACE, 'face')); o.appendChild(swRow('눈', EYES, 'eyes')); o.appendChild(swRow('눈썹', BROWS, 'brows')); o.appendChild(swRow('입', MOUTH, 'mouth'));
