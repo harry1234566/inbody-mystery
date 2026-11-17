@@ -21,8 +21,8 @@ python3 -m http.server 8000
 ## 폴더 구조
 | 경로 | 내용 |
 |---|---|
-| `index.html` | 배포용 완성 파일 (이 파일 하나 + `vendor/`로 실행) |
-| `vendor/three.min.js` | Three.js r128 (MIT) |
+| `index.html` | 배포용 완성 파일. three.js까지 들어 있어 이 파일 하나만으로 실행됩니다 |
+| `vendor/three.min.js` | Three.js r128 (MIT) 원본과 라이선스. `build.py`가 index.html 안에 넣습니다 |
 | `src/` | 수정용 원본 조각: 화면(`head.html`), 내용·참고문헌(`core.js`), 통계 설명(`extra.js`), 3D(`three*.js`), 포스터(`posters.js`), 흐름(`ui*.js`), 모형 설정(`cfg.json`), 그래프·범위(`data.js`) |
 | `build.py` | `src/`를 합쳐 `index.html`을 다시 만듭니다: `python3 build.py` |
 | `tools/charts.py` | 통계 그래프·범위 재생성 스크립트 (원시자료 필요) |
@@ -33,7 +33,33 @@ python3 -m http.server 8000
 ## 자료 이용 주의
 국민건강영양조사 원시자료(`HN24_ALL.csv` 등)는 이용지침에 따라 **이 저장소에 올리지 않습니다**. `src/data.js`에는 가중 분위수·그래프 같은 집계 결과만 들어 있습니다.
 
+
+## 자료 출처 · 대상자 수 · 가중치 · 단위 · 기준 문헌
+| 항목 | 내용 |
+|---|---|
+| 자료 출처 | 질병관리청 국민건강영양조사 제9기 3차년도(2024) 원시자료 · 출처 표기: 국민건강영양조사, 2024. 질병관리청 |
+| 대상자 수 | 40세 이상, BIA(InBody 970)·DXA 동시 측정 3,187명 (남 1,318, 여 1,869) · 성별×연령대: 남 268/542/508, 여 410/789/670 (40–49/50–64/65+) |
+| 가중치 | 복합표본 설계: 층 `kstrata`, 집락 `psu`, 검진조사 가중치 `wt_itvex`. 분위수·비율·평균은 가중 추정, 표준오차는 테일러 선형화 |
+| 단위 | 나이 세(80세 이상은 80으로 공개) · 키 cm · 체중 kg · BMI kg/m² · 허리둘레 cm · 근육지수(SMI = 팔·다리 근육량 합 ÷ 키²) kg/m² · 체지방률 % · 위상각 ° · 세포외수분비(비율) |
+| 기준 문헌 | 상대 기준 하위 20%: AWGS 2025 · BIA 근육 기준 남 7.0/여 5.7 kg/m²: AWGS 2019 · BMI·허리둘레: 대한비만학회 2022 · 두 기기 차이: Bland·Altman 1986 · 일치도: Landis·Koch 1977 · 모형 보고: TRIPOD+AI 2024 |
+
+게임 화면의 모든 "내 위치"는 같은 성별·연령대 사람들 사이의 **상대적 위치**일 뿐 건강 상태를 확정하지 않습니다.
+
+## 공개 범위 점검 (올리기 전에)
+```bash
+python3 tools/check_public.py            # 현재 파일 점검
+python3 tools/check_public.py --history  # git 과거 커밋까지 점검
+```
+- 원시자료(`HN24_ALL.csv` 등)와 개인 단위 표는 올리지 않습니다. `.gitignore`가 csv·xlsx·sav 등을 막습니다.
+- `src/data.js`·`src/cfg.json`에는 가중 분위수, 회귀계수, 집계 비율만 있습니다. Bland-Altman 그림은 개인 점 대신 칸(5명 미만 칸 숨김)으로 그립니다.
+- 게임은 입력값을 저장·전송하지 않습니다(외부 요청은 글꼴(Google Fonts)뿐이며 입력값은 담기지 않습니다).
+
+## 라이선스
+- 게임 코드·그림·문구: TEAM 집현전.
+- `vendor/three.min.js`: three.js r128, MIT License (`vendor/LICENSE-three.txt`).
+- 글꼴: Noto Sans KR·Outfit (SIL Open Font License), Google Fonts에서 불러옵니다.
+
 ## 주요 근거
-게임 안 **탐험 수첩 → 근거 문헌**에 전체 목록(27개)이 있습니다. 예: Kyle 2004(Clin Nutr), Bland·Altman 1986(Lancet), WHO 2020, AWGS 2019·2025, ESPEN·EASO 2022, 대한비만학회 2022, TRIPOD+AI 2024.
+게임 안 **탐험 수첩 → 근거 문헌**에 전체 목록(28개)이 있고, **탐험 수첩 → 자료 정보**에 출처·대상자 수·가중치·단위·기준 문헌이 있습니다. 예: Kyle 2004(Clin Nutr), Bland·Altman 1986(Lancet), WHO 2020, AWGS 2019·2025, ESPEN·EASO 2022, 대한비만학회 2022, TRIPOD+AI 2024.
 
 TEAM 집현전 · 박세현, 이현서, 김현서 · 지도교수 박연희(통계학과)

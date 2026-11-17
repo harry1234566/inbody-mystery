@@ -135,7 +135,8 @@ segInit('segMode', v=>{ mmode = v; document.querySelectorAll('[data-g]').forEach
 const num = s => { if (s==null) return NaN; s = String(s).trim().replace(',', '.'); return s==='' ? NaN : Number(s); };
 function setBadge(k, kind){ const f = document.querySelector(`.field[data-k="${k}"] .l`); if (!f) return; f.querySelectorAll('.badge').forEach(b=>b.remove());
   if (kind){ const b = document.createElement('span'); b.className = 'badge' + (kind==='check'?' w':''); b.textContent = kind==='check' ? '확인 필요' : '결과지에서 읽음'; f.appendChild(b); } }
-Object.keys(FIELDS).forEach(k=>{ $('f_'+k).addEventListener('input', ()=>{ setBadge(k, null); flags[k] = null; checkField(k); }); });
+let softOK = false;
+Object.keys(FIELDS).forEach(k=>{ $('f_'+k).addEventListener('input', ()=>{ setBadge(k, null); flags[k] = null; softOK = false; checkField(k); }); });
 function checkField(k){
   const fld = document.querySelector(`.field[data-k="${k}"]`); const wrap = fld.querySelector('.unitwrap'), msg = fld.querySelector('.msg');
   const v = num($('f_'+k).value), [lo,hi,u] = FIELDS[k]; wrap.classList.remove('bad','warn'); msg.className = 'msg'; msg.textContent = '';
@@ -144,8 +145,25 @@ function checkField(k){
   if (k==='pbf' && v>0 && v<1){ wrap.classList.add('warn'); msg.className='msg w'; msg.textContent = `비율로 읽힌 것 같아요. ${Math.round(v*1000)/10}%가 맞나요?`; return false; }
   if (k==='ecw' && v>=1 && v<1000){ wrap.classList.add('warn'); msg.className='msg w'; msg.textContent = '세포외수분비는 0.36~0.40 정도의 소수예요. 소수점을 확인해 주세요.'; return false; }
   if (v<lo || v>hi){ wrap.classList.add('bad'); msg.textContent = `보통 ${lo}~${hi}${u} 범위예요. 단위와 소수점을 확인해 주세요.`; return false; }
-  if (flags[k]==='check'){ wrap.classList.add('warn'); msg.className='msg w'; msg.textContent = '사진에서 읽은 값이 흐릿했어요. 결과지와 같은지 확인해 주세요.'; }
   return true;
+}
+/* 여러 칸을 함께 보는 점검: hard = 진행 불가, soft = 확인 후 진행 */
+function crossChecks(v){
+  const hard = [], soft = []; if (!Number.isFinite(v.ht) || !Number.isFinite(v.wt)) return {hard, soft};
+  const h2 = (v.ht/100)**2, bmi = v.wt/h2;
+  if (bmi < 12 || bmi > 60) hard.push(`키 ${v.ht} cm, 체중 ${v.wt} kg이면 BMI가 ${f1(bmi)}예요. 키와 체중의 단위를 확인해 주세요.`);
+  if (v.mode==='limb' && [v.ra,v.la,v.rl,v.ll].every(Number.isFinite)){
+    const asm = v.ra+v.la+v.rl+v.ll, smi = asm/h2;
+    if (smi < 3 || smi > 15) hard.push(`팔·다리 근육량 합 ${f1(asm)} kg으로 계산한 근육지수가 ${f1(smi)} kg/m²예요. 결과지의 "부위별 근육량" 칸 값인지 확인해 주세요.`);
+    else if (asm/v.wt > 0.45 || asm/v.wt < 0.12) soft.push(`팔·다리 근육량 합(${f1(asm)} kg)이 체중의 ${Math.round(asm/v.wt*100)}%예요. 보통 20~40% 정도라 칸을 바꿔 적지 않았는지 확인해 주세요.`);
+    if (Math.max(v.ra,v.la) > Math.min(v.rl,v.ll)) soft.push('팔 근육량이 다리 근육량보다 커요. 팔과 다리 칸이 바뀌지 않았는지 확인해 주세요.');
+    const asym = (a,b) => Math.abs(a-b)/Math.max(a,b);
+    if (asym(v.ra,v.la) > 0.35 || asym(v.rl,v.ll) > 0.35) soft.push('오른쪽과 왼쪽 근육량 차이가 35% 넘게 나요. 소수점이나 칸을 확인해 주세요.');
+  }
+  if (Number.isFinite(v.wc)){ const r = v.wc/v.ht; if (r < 0.35 || r > 0.85) soft.push(`허리둘레 ${v.wc} cm는 키의 ${Math.round(r*100)}%예요. 허리둘레 단위(cm)를 확인해 주세요.`); }
+  if (Number.isFinite(v.pbf)){ if (v.pbf < 8 && bmi > 30) soft.push(`BMI ${f1(bmi)}에 체지방률 ${v.pbf}%는 드문 조합이에요. 체지방률 칸을 확인해 주세요.`); if (v.pbf > 50 && bmi < 18.5) soft.push(`BMI ${f1(bmi)}에 체지방률 ${v.pbf}%는 드문 조합이에요. 체지방률 칸을 확인해 주세요.`); }
+  if (v.age > 80) soft.push('공개 자료는 80세 이상을 80세로 묶어 두어서, 모형에는 80세로 계산해요.');
+  return {hard, soft};
 }
 function readForm(){
   const v = {sex, mode:mmode, dev:$('f_dev').value}; let ok = true; const missing = [];
@@ -159,6 +177,10 @@ function readForm(){
 $('form').addEventListener('submit', e=>{
   e.preventDefault(); const {v, ok, missing} = readForm(); const m = $('formMsg'); m.className = 'msg';
   if (!ok){ m.textContent = missing.length ? `빈 칸을 채워 주세요: ${missing.join(', ')}` : '표시된 칸을 확인해 주세요.'; const first = document.querySelector('#panel .unitwrap.bad, #panel .unitwrap.warn'); if (first) first.scrollIntoView({block:'center', behavior:'smooth'}); return; }
+  const cc = crossChecks(v);
+  if (cc.hard.length){ m.className = 'msg'; m.innerHTML = '<b>입력값을 다시 확인해 주세요</b><ul class="facts">' + cc.hard.map(t=>`<li>${t}</li>`).join('') + '</ul>'; m.scrollIntoView({block:'center', behavior:'smooth'}); return; }
+  if (cc.soft.length && !softOK){ m.className = 'msg w'; m.innerHTML = '<b>값을 한 번 더 확인해 주세요</b><ul class="facts">' + cc.soft.map(t=>`<li>${t}</li>`).join('') + '</ul><button type="button" class="btn sm" id="softGo">확인했어요, 이대로 계속</button>';
+    $('softGo').onclick = ()=>{ softOK = true; $('form').requestSubmit(); }; m.scrollIntoView({block:'center', behavior:'smooth'}); return; }
   m.textContent = '';
   if (v.age < 40) return useDemo('39세 이하는 연구모형 적용 대상이 아니라서 예시 값으로 체험해요.');
   if (v.dev==='other') return useDemo('연구모형은 InBody 970 측정값으로 만들어져서, 다른 기기는 예시 값으로 체험해요.');

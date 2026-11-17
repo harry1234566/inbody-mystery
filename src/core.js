@@ -1,8 +1,6 @@
 /* ================= 공통 ================= */
 const $ = id => document.getElementById(id);
 const CFG = __CFG__;
-const OCR_LIB = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
-const PDF_LIB = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
 const CONSULT = '연구모형상 결과가 달라질 가능성이 있으므로 필요하면 전문가와 상담 후 정확한 검사를 고려해 보세요.';
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -44,17 +42,22 @@ const bandOf = a => a < 50 ? '40-49' : a < 65 ? '50-64' : '65+';
 function score(key, x){ const m = CFG.models[key]; return sig(m.vars.reduce((s,v,i)=>s + m.coef[i]*x[v], 0)); }
 function predict(v){
   const sx = v.sex, band = bandOf(v.age), cut = CFG.cutoffs[`${sx}_${band}`], sd = CFG.sd[sx];
+  const ageM = Math.min(v.age, 80); /* 국민건강영양조사 나이는 80세 이상을 80으로 묶어 공개 → 모형에는 80까지만 */
   const h2 = (v.ht/100)**2, bmi = v.wt/h2;
   const smi = v.mode==='smi' ? v.smi : (v.ra+v.la+v.rl+v.ll)/h2;
   const bm = smi < cut.smi ? 1 : 0, bf = v.pbf >= cut.pbf ? 1 : 0;
   const dist_m = (smi - cut.smi)/sd.smi, dist_f = (cut.pbf - v.pbf)/sd.pbf;
   const hasWc = Number.isFinite(v.wc);
-  const pm = score(`${hasWc?'muscle':'muscle_nowaist'}_${bm?'c2':'c1'}_${sx}`, {const:1, dist_m, age:v.age, HE_ht:v.ht, HE_BMI:bmi, HE_wc:v.wc});
-  const pf = score(`fat_${bf?'c2':'c1'}_${sx}`, {const:1, dist_f, age:v.age});
+  const pm = score(`${hasWc?'muscle':'muscle_nowaist'}_${bm?'c2':'c1'}_${sx}`, {const:1, dist_m, age:ageM, HE_ht:v.ht, HE_BMI:bmi, HE_wc:v.wc});
+  const pf = score(`fat_${bf?'c2':'c1'}_${sx}`, {const:1, dist_f, age:ageM});
   const rm = CFG.rate[`muscle_${bm?'c2':'c1'}_${sx}_${band}`], rf = CFG.rate[`fat_${bf?'c2':'c1'}_${sx}_${band}`];
   const mLow = bm ? (pm >= .5 ? 0 : 1) : (pm >= .5 ? 1 : 0);
   const fHigh = bf ? (pf >= .5 ? 0 : 1) : (pf >= .5 ? 1 : 0);
-  return {sx, band, cut, smi, bmi, bm, bf, dist_m, dist_f, pm, pf, rm, rf, mLow, fHigh, hasWc,
+  const T = DATA_INFO.train[sx], ext = [];
+  const chk = (k, x, lab, u) => { if (Number.isFinite(x) && (x < T[k][0] || x > T[k][1])) ext.push(`${lab} ${f1(x)}${u} (연구 자료 1~99% 범위 ${T[k][0]}~${T[k][1]}${u})`); };
+  chk('ht', v.ht, '키', ' cm'); chk('bmi', bmi, 'BMI', ' kg/m²'); if (hasWc) chk('wc', v.wc, '허리둘레', ' cm'); chk('smi', smi, '근육지수', ' kg/m²'); chk('pbf', v.pbf, '체지방률', '%');
+  if (v.age > 80) ext.push(`나이 ${v.age}세 (공개 자료는 80세 이상을 80세로 묶어, 모형에는 80세로 넣었어요)`);
+  return {sx, band, cut, smi, bmi, bm, bf, dist_m, dist_f, pm, pf, rm, rf, mLow, fHigh, hasWc, ext,
           room: mLow && fHigh ? 'both' : mLow ? 'muscle' : fHigh ? 'fat' : 'balance'};
 }
 function factors(v, r){
@@ -63,7 +66,7 @@ function factors(v, r){
   if (Math.abs(r.dist_f) < 0.5) out.push('체지방률이 상대 기준선 가까이 있어요. 기준선 근처일수록 두 기기의 분류가 쉽게 달라졌어요.');
   if (!r.bm && v.ht > mean.ht && r.bmi < mean.bmi - 1) out.push('키가 크고 마른 편이에요. 이런 체형에서는 BIA가 근육을 DXA보다 높게 보여주는 경향이 있었어요.');
   if (r.bm && v.ht < mean.ht) out.push('키가 작은 편이에요. BIA로 근육 하위군이어도 DXA로는 아닌 경우가 키가 작을수록 많았어요.');
-  if (Number.isFinite(v.pha) && v.pha < opt.pha_low20) out.push('위상각이 같은 성별·연령대의 하위 20%보다 낮아요. 위상각이 낮을수록 BIA가 체지방을 낮게 보여주는 경향이 있었어요(설명용, 확률 계산에는 쓰지 않음).');
+  if (Number.isFinite(v.pha) && v.pha < opt.pha_low20) out.push('위상각이 같은 성별·연령대의 하위 20%보다 낮아요. 위상각은 탐색 분석에서 체지방 불일치 후보로 나왔지만 복합표본 회귀에서는 통계적으로 확실하지 않았어요(설명용, 확률 계산에는 쓰지 않음).');
   if (Number.isFinite(v.ecw) && v.ecw >= 0.40) out.push('세포외수분비가 0.40 이상이에요. 몸의 수분 균형이 달라져 있으면 BIA 결과 해석에 주의가 필요해요.');
   if (!r.hasWc) out.push('허리둘레가 없어서 허리둘레를 뺀 근육 모형으로 계산했어요.');
   if (!out.length) out.push('측정값이 기준선에서 충분히 떨어져 있어, 두 기기의 분류가 같을 가능성이 높은 편이에요.');
@@ -100,7 +103,8 @@ const ROOMS = {
 const ISSUE = {'①':'수치 맹신','②':'정밀 검사 접근성','③':'잘못된 정보','④':'체형 편견'};
 
 /* 개인 맞춤 값: 본 연구 Bland-Altman 평균 차이(BIA − DXA)와 95% 일치한계 폭 */
-const BA = {1:{pbf:5.18, pbfLoA:6.1, smi:0.95, smiLoA:0.9}, 2:{pbf:6.49, pbfLoA:6.1, smi:0.99, smiLoA:0.8}};
+/* Bland-Altman: 복합표본 가중 평균 차이(BIA−DXA)와 95% 일치한계 반폭(1.96×가중 SD) */
+const BA = {1:{pbf:5.35, pbfLoA:6.1, smi:0.96, smiLoA:0.89}, 2:{pbf:6.57, pbfLoA:6.0, smi:1.01, smiLoA:0.78}};
 const f1 = x => (Math.round(x*10)/10).toFixed(1);
 const sdTxt = d => { const a = Math.abs(d); return a < 0.5 ? `아주 가까이(표준편차의 ${f1(a)}배)` : `표준편차의 ${f1(a)}배만큼`; };
 
@@ -123,7 +127,7 @@ const Q = {
   lesson:'BIA 비교는 오전·공복·화장실 후·운동 전처럼 같은 조건에서.',
   camp:'보건소와 헬스장 측정기 옆에 "표준 측정 안내문"을 붙이자고 제안해요.', refs:[3,26]},
  B2:{issue:'②', name:'기준선 차트', title:'경계선 위의 나',
-  q:c=>`방문자님의 값은 같은 성별·연령대 기준선에서 근육은 ${sdTxt(c.dm)}, 체지방은 ${sdTxt(c.df)} 떨어져 있어요. 우리 모형에서 두 기기 결과가 가장 잘 엇갈린 사람은?`,
+  q:c=>`방문자님의 값은 같은 성별·연령대 기준선에서 근육은 ${sdTxt(c.dm)}, 체지방은 ${sdTxt(c.df)} 떨어져 있어요(표준편차의 배수: 0에 가까울수록 기준선 바로 옆이에요). 우리 모형에서 두 기기 결과가 가장 잘 엇갈린 사람은?`,
   opts:()=>['기준선에서 아주 먼 사람','기준선 바로 근처에 있는 사람','나이가 가장 어린 사람'], ans:1,
   hint:'차트의 빨간 선 근처에서는 작은 차이로도 칸이 바뀌어요.',
   ok:c=>`예측 모형에서 가장 강한 요인은 기준선까지의 거리였어요. ${Math.min(Math.abs(c.dm),Math.abs(c.df))<0.5 ? '방문자님은 경계 가까이에 있어서, 한 번의 결과로 단정하지 말고 같은 조건에서 다시 확인하는 것이 좋아요.' : '방문자님은 기준선에서 비교적 떨어져 있지만, 경계 근처라면 한 번 더 확인하는 습관이 도움이 돼요.'} 정밀 검사를 모두가 받기는 어려우니, 경계에 있는 사람을 먼저 다시 확인하는 것이 한정된 검사를 나누는 현실적인 방법이에요.`,
@@ -145,11 +149,11 @@ const Q = {
   camp:'"정상이면 끝", "마르면 건강" 같은 체형 편견 대신, 모두에게 맞는 관리를 응원해요.', refs:[1,6,21]},
 
  F1:{issue:'①', name:'DXA 검사대', title:'내 체지방률, DXA로 쟀다면?',
-  q:c=>`방문자님의 인바디 체지방률은 ${f1(c.pbf)}%예요. 우리 연구에서 같은 사람을 DXA로 재면 체지방률이 평균 ${f1(BA[c.sex].pbf)}%p 높게 나왔어요. DXA로 쟀다면 대략 몇 %였을까요?`,
+  q:c=>`방문자님의 인바디 체지방률은 ${f1(c.pbf)}%예요. 우리 연구(국민건강영양조사 2024, 가중 분석)에서 같은 사람을 DXA로 재면 체지방률이 평균 ${f1(BA[c.sex].pbf)}%p 높게 나왔어요. DXA로 쟀다면 대략 몇 %였을까요?`,
   opts:c=>[`약 ${f1(c.pbf-BA[c.sex].pbf)}%`,`약 ${f1(c.pbf)}%`,`약 ${f1(c.pbf+BA[c.sex].pbf)}%`], ans:2,
   hint:'인바디는 체지방을 DXA보다 낮게 보여주는 경향이 있었어요.',
   ok:c=>`평균 차이를 더한 참고값은 약 ${f1(c.pbf+BA[c.sex].pbf)}%예요. 다만 사람마다 차이가 커서, 95%의 사람은 평균 차이에서 ±${f1(BA[c.sex].pbfLoA)}%p 안에 있었어요(Bland-Altman 일치한계). 그래서 숫자 하나보다 범위로 이해하는 것이 정확해요.`,
-  lesson:'BIA 체지방률은 DXA보다 평균 5~6%p 낮았다(±6%p). 범위로 읽기.',
+  lesson:'BIA 체지방률은 DXA보다 평균 5.4~6.6%p 낮았다(가중 평균, 일치한계 ±6%p). 범위로 읽기.',
   camp:'체성분 결과지에 "측정 기기에 따라 체지방률이 다르게 나올 수 있음"을 표기하자고 제안해요.', refs:[1,4]},
  F2:{issue:'②', name:'줄자와 검진 안내판', title:'DXA 없이도, 누구나 확인할 수 있는 지표',
   q:()=>'정밀 장비가 없어도, 국가 일반건강검진에서 이미 누구나 확인할 수 있는 복부비만 지표는?',
@@ -167,14 +171,14 @@ const Q = {
   camp:'"BMI만 보면 된다"는 정보 대신, 체지방과 허리둘레를 함께 보는 공공 캠페인을 제안해요.', refs:[11]},
  F4:{issue:'④', name:'혈액 검사 액자', title:'겉모습으로는 보이지 않는 신호',
   q:()=>'인바디로는 체지방이 괜찮았지만 DXA로는 상위군이었던 사람들. 이들의 혈액 검사에서 보인 경향은?',
-  opts:()=>['좋은 콜레스테롤(HDL)은 낮고 중성지방은 높았다','모든 지표가 더 좋았다','차이가 없었다'], ans:0,
+  opts:()=>['좋은 콜레스테롤(HDL)은 낮았고, 여성은 중성지방도 높았다','모든 지표가 더 좋았다','차이가 없었다'], ans:0,
   hint:'숨은 체지방은 혈관 속 지방 지표에 신호를 줘요.',
   ok:()=>'나이·질환을 보정한 복합표본 회귀에서 이 집단은 HDL이 남성 약 3.0, 여성 약 4.8 mg/dL 낮았고, 여성은 중성지방이 약 12 mg/dL 높았어요. 또 몸통은 체중의 약 75%를 차지하지만 전체 전기 저항의 약 9%만 차지해서, 몸통에 쌓인 지방은 BIA에 덜 반영될 수 있어요.',
   lesson:'BIA로 놓친 숨은 체지방군은 HDL↓·중성지방↑ 경향. 몸통 지방은 BIA에 덜 반영.',
   camp:'"마르면 건강"이라는 편견 대신, 체형과 관계없이 허리둘레와 혈액 지표를 함께 보자고 제안해요.', refs:[1,12]},
 
  M1:{issue:'①', name:'키 재기 막대', title:'내 근육지수, DXA로 쟀다면?',
-  q:c=>`방문자님의 인바디 근육지수(팔·다리 근육량 ÷ 키²)는 ${f1(c.smi)} kg/m²예요. 우리 연구에서 같은 사람을 DXA로 재면 평균 약 ${f1(BA[c.sex].smi)} kg/m² 낮게 나왔어요. DXA로 쟀다면 대략?`,
+  q:c=>`방문자님의 인바디 근육지수(팔·다리 근육량 ÷ 키²)는 ${f1(c.smi)} kg/m²예요. 우리 연구(국민건강영양조사 2024, 가중 분석)에서 같은 사람을 DXA로 재면 평균 약 ${f1(BA[c.sex].smi)} kg/m² 낮게 나왔어요. DXA로 쟀다면 대략?`,
   opts:c=>[`약 ${f1(c.smi-BA[c.sex].smi)} kg/m²`,`약 ${f1(c.smi)} kg/m²`,`약 ${f1(c.smi+BA[c.sex].smi)} kg/m²`], ans:0,
   hint:'인바디는 근육을 DXA보다 넉넉하게 보여주는 경향이 있었어요.',
   ok:c=>`평균 차이를 뺀 참고값은 약 ${f1(c.smi-BA[c.sex].smi)} kg/m²예요. 95%의 사람은 평균 차이에서 ±${f1(BA[c.sex].smiLoA)} kg/m² 안에 있었어요. 특히 키가 크고 마른 체형일수록 인바디가 근육을 높게 보여줬어요. BIA는 몸을 원통 여러 개로 가정하고 평균적인 사람 자료로 만든 식으로 계산해서, 체형이 평균과 다를수록 오차가 커질 수 있어요.`,
