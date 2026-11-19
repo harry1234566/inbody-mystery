@@ -75,7 +75,7 @@ function buildLobby(){
   illPoster('L', 4.35, 2.15, 1.15, 1.35, 'issues4', '#2f6f5e');
   illPoster('B', -6.85, 2.25, 1.15, 1.3, 'bia_dxa', '#5f88b5');
   illPoster('B', 3.6, 2.25, 0.72, 0.95, 'move', '#5f9e86');
-  tv('L', -2.4, 2.0, [['인바디 맹신 탈출',0.95,700,'#2f4858'],['캠페인 퀴즈',0.8,500,'#2f6f5e']]);
+  tv('L', -2.4, 2.0, [['인바디 미스터리',0.95,700,'#2f4858'],['방탈출 캠페인 퀴즈',0.8,500,'#2f6f5e']]);
   for (const [k,[side,u]] of Object.entries(LOBBY_DOORS)){ const R = ROOMS[k]; DOORS[k] = door(side, u, R.door, `${R.no} · ${R.name}`); }
   // 접수대
   const rc = grp(0.6, 0, -2.5, 0); mesh(rbox(3.3,1.02,0.85,0.08), M('#f4efe3',0.85), 0,0.51,0, rc); mesh(rbox(3.45,0.08,1.0,0.03), M(WOOD,0.7), 0,1.06,0.02, rc);

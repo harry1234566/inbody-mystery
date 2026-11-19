@@ -12,7 +12,7 @@ function lobbyHS(){
   addHS({id:'tv', label:'대기실 TV', pos:[-7.7,3.15,-2.4], stand:[-6.5,-2.4], look:[-8,-2.4], pov:true, ty:2.0, main:()=>stage==='tv', show:()=>!['intro','avatar'].includes(stage), done:()=>notes.some(n=>n.id==='C1'),
     use: async ()=>{
       if (stage==='tv'){ chapter('CHAPTER 04 · WAITING ROOM', '대기실의 단서', '대기실 TV의 캠페인 퀴즈를 풀어 보세요.');
-        await say('대기실 TV', '보건소 캠페인 방송: "인바디 숫자, 얼마나 믿어도 될까요?" 첫 단서를 찾아보세요.', {btns:['풀어 보기']}); await quiz(Q.C1);
+        await say('대기실 TV', '보건소 캠페인 방송: "방탈출 게임: 인바디 미스터리! 인바디 숫자 하나에 숨은 이야기를 함께 풀어 봐요." 첫 단서를 찾아보세요.', {btns:['풀어 보기']}); await quiz(Q.C1);
         stage = 'consult'; await say('간호사', '첫 단서를 찾으셨네요. 숫자 하나로 단정하면 안 되는 이유예요. 이제 방문자님 결과를 같이 볼게요. <b>접수 창구</b>로 와 주세요.'); objective('접수 창구에서 결과 상담을 받으세요.'); pill('04 — 보건소 로비 · 대기실'); play(); return; }
       await say('대기실 TV', `다시 보기: ${esc(Q.C1.lesson)}`, {extra:refsHTML(Q.C1.refs) + `<div class="refs"><span>통계로 보기</span>${statBtn('kappa', STATS.kappa.t)}</div>`}); play(); }});
   addHS({id:'inbody', label:'체성분 측정기', pos:[-6.7,2.2,-4.8], stand:[-5.6,-3.9], look:[-6.7,-4.8], pov:true, ty:1.2, show:()=>!['intro','avatar'].includes(stage), done:()=>notes.some(n=>n.id==='inbody'), use:()=>clue('inbody')});
@@ -28,7 +28,7 @@ async function clue(id){
   const st = id==='inbody' ? 'bia_dxa' : 'survey';
   await say('안내', c.html, {title:`${c.name} · ${c.title}`, extra:refsHTML(c.refs) + `<div class="refs"><span>통계로 보기</span>${statBtn(st, STATS[st].t)}</div>`, wide:true}); play();
 }
-function introHint(){ play(); say('간호사', '안녕하세요, 집현전 보건소예요! 요즘 우리 동네엔 인바디 숫자 하나로 "난 괜찮다" 안심하거나 "큰일 났다" 걱정하는 분이 많아요. 보건소장님이 <b>"숫자 너머 내 몸 바로알기" 정책 제안서</b>를 만들고 계신데, 방문자님이 <b>시민 조사관</b>이 되어 단서를 모아 주실래요? 먼저 접수부터 도와드릴게요.', {btns:['접수하기'], free:true}).then(()=>{ if (stage==='intro') openConsent(); }); }
+function introHint(){ play(); say('간호사', '안녕하세요, 집현전 보건소예요! <b>방탈출 게임: 인바디 미스터리</b>에 오신 걸 환영해요. 요즘 우리 동네엔 인바디 숫자 하나로 "난 괜찮다" 안심하거나 "큰일 났다" 걱정하는 분이 많아요. 보건소장님이 <b>"숫자 너머 내 몸 바로알기" 정책 제안서</b>를 만들고 계신데, 방문자님이 <b>시민 조사관</b>이 되어 단서를 모아 주실래요? 먼저 접수부터 도와드릴게요.', {btns:['접수하기'], free:true}).then(()=>{ if (stage==='intro') openConsent(); }); }
 
 async function toWaiting(){
   stage = 'tv'; play(); dlgClose(); showInfo();
@@ -107,7 +107,7 @@ async function enterRoom(k){
   chapter(`CHAPTER 06 · ${R.en}`, R.name, '미션 4개를 풀어 열쇠를 모으세요.'); pill(`06 — ${R.space} · ${R.name}`);
   await openDoor(DOORS.exit, 0); toast('문이 잠겼어요! 열쇠 4개를 모으면 열려요');
   const fs = factors(current, result).slice(0,3);
-  await say('안내', `${R.space}에 들어왔어요. 이 방의 정책 과제는 <b>"${R.camp}"</b>예요. 미션 4개는 각각 사회문제 ①수치 맹신 ②검사 접근성 ③잘못된 정보 ④체형 편견과 이어져요. 반짝이는 표시를 눌러 시작하세요.`, {btns:['조사 시작'], wide:true, title:'이 방에 온 이유',
+  await say('안내', `${R.space}에 들어왔어요. 이 방의 정책 과제는 <b>"${R.camp}"</b>예요. 미션 4개는 각각 사회문제 ①인바디 숫자 미스터리 ②검사 접근성 ③잘못된 정보 ④체형 편견과 이어져요. 반짝이는 표시를 눌러 시작하세요.`, {btns:['조사 시작'], wide:true, title:'이 방에 온 이유',
     extra:`<div class="box"><ul class="facts"><li>${R.why}</li>${fs.map(t=>`<li>${t}</li>`).join('')}</ul></div><p class="small">교육용 분류이며 의학적 진단이 아니에요. ${statBtn('rule50','방 배정 규칙')}</p>`});
   play();
 }
@@ -176,7 +176,7 @@ function pager(i, onDone){
 let endIdx = 0;
 async function ending(){
   const R = ROOMS[roomKey]; mode = 'busy'; doctor.facing = Math.atan2(player.root.position.x-doctor.root.position.x, player.root.position.z-doctor.root.position.z);
-  await say('의사', `시민 조사관님, 열쇠 ${cards.length}개로 방을 탈출하셨군요! 열쇠에 새겨진 제안을 모아 제안서를 만들어 볼게요. 먼저 방문자님 결과부터 정리해 볼게요. 연구모형이 예측한 상대적 분류 유형은 <b>${R.name}</b>이었어요.`, {btns:['제안서 펼치기']});
+  await say('의사', `시민 조사관님, 열쇠 ${cards.length}개로 인바디 미스터리를 풀고 방을 탈출하셨군요! 열쇠에 새겨진 제안을 모아 제안서를 만들어 볼게요. 먼저 방문자님 결과부터 정리해 볼게요. 연구모형이 예측한 상대적 분류 유형은 <b>${R.name}</b>이었어요.`, {btns:['제안서 펼치기']});
   pager(0, survey);
 }
 function survey(){
@@ -194,7 +194,7 @@ function survey(){
 function recordText(){
   const sec = Math.round((performance.now()-(log.start||performance.now()))/1000), m = Math.floor(sec/60), s = sec%60;
   const L = ['쉬움','적당','어려움'], U = ['잘 이해','조금 이해','모름'], A = ['개인','지역사회','보건정책'];
-  return `[인바디 미스터리 체험 기록] 방: ${ROOMS[roomKey].name}${demo?'(체험 모드)':''} | 소요 ${m}분 ${s}초 | 퀴즈 ${log.quizzes}개 중 첫 시도 정답 ${log.firstTry}개, 오답 ${log.wrong}회 | 단서 ${notes.length}개 | 난이도: ${sv.level==null?'-':L[sv.level]} | 이해: ${sv.under==null?'-':U[sv.under]} | 기억에 남는 문제: ${sv.msg==null?'-':ISSUES[sv.msg].name} | 필요한 변화: ${sv.act==null?'-':A[sv.act]} | 문항별 시도·초: ${log.hints.map(h=>`${h.id}:${h.tries}/${h.sec}s`).join(',')}`;
+  return `[방탈출 게임: 인바디 미스터리 체험 기록] 방: ${ROOMS[roomKey].name}${demo?'(체험 모드)':''} | 소요 ${m}분 ${s}초 | 퀴즈 ${log.quizzes}개 중 첫 시도 정답 ${log.firstTry}개, 오답 ${log.wrong}회 | 단서 ${notes.length}개 | 난이도: ${sv.level==null?'-':L[sv.level]} | 이해: ${sv.under==null?'-':U[sv.under]} | 기억에 남는 문제: ${sv.msg==null?'-':ISSUES[sv.msg].name} | 필요한 변화: ${sv.act==null?'-':A[sv.act]} | 문항별 시도·초: ${log.hints.map(h=>`${h.id}:${h.tries}/${h.sec}s`).join(',')}`;
 }
 const pledged = new Set([0]);
 function pledgeCard(){
@@ -215,7 +215,7 @@ function restart(){
   Object.values(Q).forEach(q=>q.solved = false); PIC.me = ''; healthy = false; $('infoCard').hidden = true; $('infoBtn').hidden = true; $('keyChip').hidden = true;
   $('form').reset(); sex = null; segSet('segSex', 0); Object.keys(FIELDS).forEach(k=>checkField(k));
   buildLobby(); lobbyHS(); player.root.position.set(-1.5,0,3.2); player.facing = Math.PI/4; CAM.mode = 'room'; dlgClose();
-  chapter('CHAPTER 01 · THE LOBBY', '작은 미스터리의 시작', '접수 창구에서 탐험을 시작하세요.'); pill('01 — 보건소 로비 · 접수 / 상담'); introHint();
+  chapter('CHAPTER 01 · THE LOBBY', '인바디 미스터리의 시작', '접수 창구에서 탐험을 시작하세요.'); pill('01 — 보건소 로비 · 접수 / 상담'); introHint();
 }
 
 /* 펑! 연기 속에서 건강한 체형으로 */

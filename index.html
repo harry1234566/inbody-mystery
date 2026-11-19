@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>인바디 미스터리</title>
+<title>방탈출 게임: 인바디 미스터리</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#eef1ea">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -350,7 +350,7 @@ body.playing #jumpBtn{display:grid;place-items:center}
 <div id="hs"></div>
 <div id="hud" hidden>
   <div id="brand" class="card"><i>+</i><div><b>집현전 보건소</b><small>JIPHYEONJEON HEALTH CENTER</small></div></div>
-  <div id="chap" class="card" aria-live="polite"><p class="eyebrow" id="chapNo">CHAPTER 01 · THE LOBBY</p><h2 id="chapTitle">작은 미스터리의 시작</h2><p class="d" id="chapDesc">접수 창구에서 탐험을 시작하세요.</p></div>
+  <div id="chap" class="card" aria-live="polite"><p class="eyebrow" id="chapNo">CHAPTER 01 · THE LOBBY</p><h2 id="chapTitle">인바디 미스터리의 시작</h2><p class="d" id="chapDesc">접수 창구에서 탐험을 시작하세요.</p></div>
   <div id="tools">
     <button class="tool" id="musicBtn" aria-pressed="false" aria-label="배경 음악"><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg></button>
     <button class="tool" id="mapBtn" aria-label="지도"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span class="t">지도</span></button>
@@ -429,7 +429,7 @@ body.playing #jumpBtn{display:grid;place-items:center}
 <button id="jumpBtn" type="button" aria-label="점프">점프</button>
 <div id="poof" aria-hidden="true"><svg width="260" height="260" viewBox="0 0 260 260"><polygon points="130,8 152,82 228,52 180,112 252,140 176,154 206,232 140,180 110,252 98,174 20,206 72,140 8,110 84,96 46,30 116,70" fill="#f2c14e" stroke="#c2452f" stroke-width="5" stroke-linejoin="round"/></svg><b>펑!</b></div>
 <div id="printArea"></div>
-<div id="loading"><div class="in"><i>+</i><b>보건소 문을 열고 있어요</b><span>따뜻한 햇살, 그리고 작은 미스터리</span></div></div>
+<div id="loading"><div class="in"><i>+</i><b>보건소 문을 열고 있어요</b><span>방탈출 게임: 인바디 미스터리</span></div></div>
 
 <script>
 /* three.js r128 (MIT, vendor/LICENSE-three.txt) — 파일 하나로 열리도록 직접 포함 */
@@ -550,7 +550,7 @@ const ROOMS = {
     pledges:['근력운동과 유산소운동 함께하기','끼니마다 단백질 식품 한 가지','필요하면 전문가와 상담하기'],
     doctor:'근육과 체지방을 함께 살펴볼 필요가 있다고 예측됐어요. 체중만 보지 말고 근력운동과 유산소운동, 단백질 섭취를 함께 챙겨 보세요.'}
 };
-const ISSUE = {'①':'수치 맹신','②':'정밀 검사 접근성','③':'잘못된 정보','④':'체형 편견'};
+const ISSUE = {'①':'인바디 숫자 미스터리','②':'정밀 검사 접근성','③':'잘못된 정보','④':'체형 편견'};
 
 /* 개인 맞춤 값: 본 연구 Bland-Altman 평균 차이(BIA − DXA)와 95% 일치한계 폭 */
 /* Bland-Altman: 복합표본 가중 평균 차이(BIA−DXA)와 95% 일치한계 반폭(1.96×가중 SD) */
@@ -643,7 +643,7 @@ const Q = {
   camp:'보건소 체성분 검사 때 악력·일어서기 검사를 함께 하고, 결과가 낮으면 지역 근력운동 교실로 이어 주자고 제안해요.', refs:[7,8,15]},
  M3:{issue:'③', name:'고장 난 운동 안내판', title:'SNS 속설: "근육은 젊을 때만 생긴다"?', kind:'short',
   q:()=>'안내판 숫자가 지워졌어요. 빈칸을 채워 고쳐 주세요.', sign:'근력운동은 나이와 관계없이 성인에게 주 [ ]일 이상 권장됩니다.',
-  short:['2','두','이틀','2일','둘','두번','2회','이'], ansText:'2', chips:['2','이틀','2일','0','365'],
+  short:['2','2일','2회','두','둘','이틀'], ansText:'2', chips:['1','2','3','5','7'],
   hint:'일주일에 이틀이에요. 숫자로 적어 주세요.',
   ok:()=>'WHO는 성인과 노인 모두에게 주 2일 이상 근력 강화 활동을 권해요. 65세 이상은 균형·근력 운동을 섞어 주 3일 이상 하도록 권해요. 나이 들어서 시작해도 늦지 않아요.',
   lesson:'근력운동은 나이와 관계없이 주 2일 이상(65세 이상은 균형 포함 주 3일).',
@@ -708,7 +708,7 @@ const CLUES = {
 
 /* ================= 사회문제와 정책 ================= */
 const ISSUES = [
-  {k:'①', name:'수치 맹신', fact:'BIA로 해당군이었던 사람의 31~38%는 DXA로는 아니었고, BIA로 괜찮았던 사람의 8~9%는 DXA로는 해당했어요. 같은 절대 기준(체지방률 남 26%, 여 36%)을 두 기기에 똑같이 쓰면 해당 비율이 BIA 45%·33%, DXA 85%·79%로 크게 벌어졌어요.',
+  {k:'①', name:'인바디 숫자 미스터리', fact:'BIA로 해당군이었던 사람의 31~38%는 DXA로는 아니었고, BIA로 괜찮았던 사람의 8~9%는 DXA로는 해당했어요. 같은 절대 기준(체지방률 남 26%, 여 36%)을 두 기기에 똑같이 쓰면 해당 비율이 BIA 45%·33%, DXA 85%·79%로 크게 벌어졌어요.',
     why:'BIA는 싸고 빠르며 휴대가 쉬워 보건소·헬스장에서 널리 쓰여요. 그만큼 숫자 하나를 진단처럼 받아들이기 쉬워요.', refs:[1,2]},
   {k:'②', name:'정밀 검사 접근성', fact:'DXA는 주로 병원에 있는 방사선 장비예요. 우리 모형은 BIA 값과 키·나이·허리둘레만으로 분류가 달라질 가능성을 예측했어요(내부 검증 AUC 0.84~0.92, 외부 검증 전).',
     why:'모두가 정밀 검사를 받을 수는 없어요. 누가 먼저 다시 확인해야 하는지 고르는 것이 한정된 자원을 나누는 문제예요.', refs:[1,25]},
@@ -1194,7 +1194,7 @@ function buildLobby(){
   illPoster('L', 4.35, 2.15, 1.15, 1.35, 'issues4', '#2f6f5e');
   illPoster('B', -6.85, 2.25, 1.15, 1.3, 'bia_dxa', '#5f88b5');
   illPoster('B', 3.6, 2.25, 0.72, 0.95, 'move', '#5f9e86');
-  tv('L', -2.4, 2.0, [['인바디 맹신 탈출',0.95,700,'#2f4858'],['캠페인 퀴즈',0.8,500,'#2f6f5e']]);
+  tv('L', -2.4, 2.0, [['인바디 미스터리',0.95,700,'#2f4858'],['방탈출 캠페인 퀴즈',0.8,500,'#2f6f5e']]);
   for (const [k,[side,u]] of Object.entries(LOBBY_DOORS)){ const R = ROOMS[k]; DOORS[k] = door(side, u, R.door, `${R.no} · ${R.name}`); }
   // 접수대
   const rc = grp(0.6, 0, -2.5, 0); mesh(rbox(3.3,1.02,0.85,0.08), M('#f4efe3',0.85), 0,0.51,0, rc); mesh(rbox(3.45,0.08,1.0,0.03), M(WOOD,0.7), 0,1.06,0.02, rc);
@@ -1337,7 +1337,7 @@ const POSTERS = {
     pText(c, 'DXA: X선 흡수', x + w*0.75, y + h*0.04, h*0.065); }},
   agree100:{t:'인바디 해당군 100명 중', cap:'31~38명은 DXA로는 해당하지 않았어요', src:'본 연구 · 국민건강영양조사 2024', draw:(c,x,y,w,h)=>{ pIcons(c, x + w*0.05, y, w*0.9, 100, 34, PK.coral, PK.sage, 10, h); }},
   issues4:{t:'체성분 숫자의 4가지 사회문제', cap:'집현전이 찾은 숙제', src:'본 연구', draw:(c,x,y,w,h)=>{
-    [['①','수치 맹신',PK.coral],['②','검사 접근성',PK.blue],['③','잘못된 정보',PK.yel],['④','체형 편견',PK.lav]].forEach(([n,t,col],i)=>{ const cx = x + (i%2)*w/2, cy = y + Math.floor(i/2)*h/2;
+    [['①','숫자 미스터리',PK.coral],['②','검사 접근성',PK.blue],['③','잘못된 정보',PK.yel],['④','체형 편견',PK.lav]].forEach(([n,t,col],i)=>{ const cx = x + (i%2)*w/2, cy = y + Math.floor(i/2)*h/2;
       c.fillStyle = col; rr(c, cx + w*0.03, cy + h*0.03, w*0.44, h*0.44, 14); c.fill(); pText(c, n, cx + w*0.25, cy + h*0.18, h*0.13, '#fff', 800); pText(c, t, cx + w*0.25, cy + h*0.35, h*0.075, '#fff', 700); }); }},
   measure:{t:'정확한 측정 체크리스트', cap:'삽입형 의료기기(심장박동기 등) 착용 시 측정 금지', src:'인바디 측정 유의사항 · Kyle 2004 II', draw:(c,x,y,w,h)=>{
     ['오전 · 공복 · 운동 전','측정 전 화장실','가벼운 옷 · 금속 제거','상온에서 측정','사우나·목욕 직후 피하기'].forEach((t,i)=>{ const yy = y + h*(0.08 + i*0.2); c.strokeStyle = PK.green; c.lineWidth = h*0.018; c.strokeRect(x + w*0.08, yy - h*0.06, h*0.12, h*0.12);
@@ -1905,7 +1905,7 @@ function lobbyHS(){
   addHS({id:'tv', label:'대기실 TV', pos:[-7.7,3.15,-2.4], stand:[-6.5,-2.4], look:[-8,-2.4], pov:true, ty:2.0, main:()=>stage==='tv', show:()=>!['intro','avatar'].includes(stage), done:()=>notes.some(n=>n.id==='C1'),
     use: async ()=>{
       if (stage==='tv'){ chapter('CHAPTER 04 · WAITING ROOM', '대기실의 단서', '대기실 TV의 캠페인 퀴즈를 풀어 보세요.');
-        await say('대기실 TV', '보건소 캠페인 방송: "인바디 숫자, 얼마나 믿어도 될까요?" 첫 단서를 찾아보세요.', {btns:['풀어 보기']}); await quiz(Q.C1);
+        await say('대기실 TV', '보건소 캠페인 방송: "방탈출 게임: 인바디 미스터리! 인바디 숫자 하나에 숨은 이야기를 함께 풀어 봐요." 첫 단서를 찾아보세요.', {btns:['풀어 보기']}); await quiz(Q.C1);
         stage = 'consult'; await say('간호사', '첫 단서를 찾으셨네요. 숫자 하나로 단정하면 안 되는 이유예요. 이제 방문자님 결과를 같이 볼게요. <b>접수 창구</b>로 와 주세요.'); objective('접수 창구에서 결과 상담을 받으세요.'); pill('04 — 보건소 로비 · 대기실'); play(); return; }
       await say('대기실 TV', `다시 보기: ${esc(Q.C1.lesson)}`, {extra:refsHTML(Q.C1.refs) + `<div class="refs"><span>통계로 보기</span>${statBtn('kappa', STATS.kappa.t)}</div>`}); play(); }});
   addHS({id:'inbody', label:'체성분 측정기', pos:[-6.7,2.2,-4.8], stand:[-5.6,-3.9], look:[-6.7,-4.8], pov:true, ty:1.2, show:()=>!['intro','avatar'].includes(stage), done:()=>notes.some(n=>n.id==='inbody'), use:()=>clue('inbody')});
@@ -1921,7 +1921,7 @@ async function clue(id){
   const st = id==='inbody' ? 'bia_dxa' : 'survey';
   await say('안내', c.html, {title:`${c.name} · ${c.title}`, extra:refsHTML(c.refs) + `<div class="refs"><span>통계로 보기</span>${statBtn(st, STATS[st].t)}</div>`, wide:true}); play();
 }
-function introHint(){ play(); say('간호사', '안녕하세요, 집현전 보건소예요! 요즘 우리 동네엔 인바디 숫자 하나로 "난 괜찮다" 안심하거나 "큰일 났다" 걱정하는 분이 많아요. 보건소장님이 <b>"숫자 너머 내 몸 바로알기" 정책 제안서</b>를 만들고 계신데, 방문자님이 <b>시민 조사관</b>이 되어 단서를 모아 주실래요? 먼저 접수부터 도와드릴게요.', {btns:['접수하기'], free:true}).then(()=>{ if (stage==='intro') openConsent(); }); }
+function introHint(){ play(); say('간호사', '안녕하세요, 집현전 보건소예요! <b>방탈출 게임: 인바디 미스터리</b>에 오신 걸 환영해요. 요즘 우리 동네엔 인바디 숫자 하나로 "난 괜찮다" 안심하거나 "큰일 났다" 걱정하는 분이 많아요. 보건소장님이 <b>"숫자 너머 내 몸 바로알기" 정책 제안서</b>를 만들고 계신데, 방문자님이 <b>시민 조사관</b>이 되어 단서를 모아 주실래요? 먼저 접수부터 도와드릴게요.', {btns:['접수하기'], free:true}).then(()=>{ if (stage==='intro') openConsent(); }); }
 
 async function toWaiting(){
   stage = 'tv'; play(); dlgClose(); showInfo();
@@ -2000,7 +2000,7 @@ async function enterRoom(k){
   chapter(`CHAPTER 06 · ${R.en}`, R.name, '미션 4개를 풀어 열쇠를 모으세요.'); pill(`06 — ${R.space} · ${R.name}`);
   await openDoor(DOORS.exit, 0); toast('문이 잠겼어요! 열쇠 4개를 모으면 열려요');
   const fs = factors(current, result).slice(0,3);
-  await say('안내', `${R.space}에 들어왔어요. 이 방의 정책 과제는 <b>"${R.camp}"</b>예요. 미션 4개는 각각 사회문제 ①수치 맹신 ②검사 접근성 ③잘못된 정보 ④체형 편견과 이어져요. 반짝이는 표시를 눌러 시작하세요.`, {btns:['조사 시작'], wide:true, title:'이 방에 온 이유',
+  await say('안내', `${R.space}에 들어왔어요. 이 방의 정책 과제는 <b>"${R.camp}"</b>예요. 미션 4개는 각각 사회문제 ①인바디 숫자 미스터리 ②검사 접근성 ③잘못된 정보 ④체형 편견과 이어져요. 반짝이는 표시를 눌러 시작하세요.`, {btns:['조사 시작'], wide:true, title:'이 방에 온 이유',
     extra:`<div class="box"><ul class="facts"><li>${R.why}</li>${fs.map(t=>`<li>${t}</li>`).join('')}</ul></div><p class="small">교육용 분류이며 의학적 진단이 아니에요. ${statBtn('rule50','방 배정 규칙')}</p>`});
   play();
 }
@@ -2069,7 +2069,7 @@ function pager(i, onDone){
 let endIdx = 0;
 async function ending(){
   const R = ROOMS[roomKey]; mode = 'busy'; doctor.facing = Math.atan2(player.root.position.x-doctor.root.position.x, player.root.position.z-doctor.root.position.z);
-  await say('의사', `시민 조사관님, 열쇠 ${cards.length}개로 방을 탈출하셨군요! 열쇠에 새겨진 제안을 모아 제안서를 만들어 볼게요. 먼저 방문자님 결과부터 정리해 볼게요. 연구모형이 예측한 상대적 분류 유형은 <b>${R.name}</b>이었어요.`, {btns:['제안서 펼치기']});
+  await say('의사', `시민 조사관님, 열쇠 ${cards.length}개로 인바디 미스터리를 풀고 방을 탈출하셨군요! 열쇠에 새겨진 제안을 모아 제안서를 만들어 볼게요. 먼저 방문자님 결과부터 정리해 볼게요. 연구모형이 예측한 상대적 분류 유형은 <b>${R.name}</b>이었어요.`, {btns:['제안서 펼치기']});
   pager(0, survey);
 }
 function survey(){
@@ -2087,7 +2087,7 @@ function survey(){
 function recordText(){
   const sec = Math.round((performance.now()-(log.start||performance.now()))/1000), m = Math.floor(sec/60), s = sec%60;
   const L = ['쉬움','적당','어려움'], U = ['잘 이해','조금 이해','모름'], A = ['개인','지역사회','보건정책'];
-  return `[인바디 미스터리 체험 기록] 방: ${ROOMS[roomKey].name}${demo?'(체험 모드)':''} | 소요 ${m}분 ${s}초 | 퀴즈 ${log.quizzes}개 중 첫 시도 정답 ${log.firstTry}개, 오답 ${log.wrong}회 | 단서 ${notes.length}개 | 난이도: ${sv.level==null?'-':L[sv.level]} | 이해: ${sv.under==null?'-':U[sv.under]} | 기억에 남는 문제: ${sv.msg==null?'-':ISSUES[sv.msg].name} | 필요한 변화: ${sv.act==null?'-':A[sv.act]} | 문항별 시도·초: ${log.hints.map(h=>`${h.id}:${h.tries}/${h.sec}s`).join(',')}`;
+  return `[방탈출 게임: 인바디 미스터리 체험 기록] 방: ${ROOMS[roomKey].name}${demo?'(체험 모드)':''} | 소요 ${m}분 ${s}초 | 퀴즈 ${log.quizzes}개 중 첫 시도 정답 ${log.firstTry}개, 오답 ${log.wrong}회 | 단서 ${notes.length}개 | 난이도: ${sv.level==null?'-':L[sv.level]} | 이해: ${sv.under==null?'-':U[sv.under]} | 기억에 남는 문제: ${sv.msg==null?'-':ISSUES[sv.msg].name} | 필요한 변화: ${sv.act==null?'-':A[sv.act]} | 문항별 시도·초: ${log.hints.map(h=>`${h.id}:${h.tries}/${h.sec}s`).join(',')}`;
 }
 const pledged = new Set([0]);
 function pledgeCard(){
@@ -2108,7 +2108,7 @@ function restart(){
   Object.values(Q).forEach(q=>q.solved = false); PIC.me = ''; healthy = false; $('infoCard').hidden = true; $('infoBtn').hidden = true; $('keyChip').hidden = true;
   $('form').reset(); sex = null; segSet('segSex', 0); Object.keys(FIELDS).forEach(k=>checkField(k));
   buildLobby(); lobbyHS(); player.root.position.set(-1.5,0,3.2); player.facing = Math.PI/4; CAM.mode = 'room'; dlgClose();
-  chapter('CHAPTER 01 · THE LOBBY', '작은 미스터리의 시작', '접수 창구에서 탐험을 시작하세요.'); pill('01 — 보건소 로비 · 접수 / 상담'); introHint();
+  chapter('CHAPTER 01 · THE LOBBY', '인바디 미스터리의 시작', '접수 창구에서 탐험을 시작하세요.'); pill('01 — 보건소 로비 · 접수 / 상담'); introHint();
 }
 
 /* 펑! 연기 속에서 건강한 체형으로 */
@@ -2277,7 +2277,7 @@ PIC.nurse = portrait(NPC_N); PIC.doctor = portrait(NPC_D);
 $('hud').hidden = false; setSafe(); CAM.init = false;
 frame();
 setTimeout(()=>{ $('loading').classList.add('off'); setTimeout(()=>$('loading').hidden = true, 700); introHint(); }, 500);
-window.__dbg = {poof:()=>poofTransform(), posterSheet:()=>{ const ks = Object.keys(POSTERS); const cw = 420, ch = 504; const c = document.createElement('canvas'); c.width = cw*6; c.height = ch*Math.ceil(ks.length/6); const g = c.getContext('2d'); ks.forEach((k,i)=>{ const P = POSTERS[k]; g.save(); g.translate((i%6)*cw, Math.floor(i/6)*ch); g.fillStyle = PK.paper; g.fillRect(0,0,cw-6,ch-6); g.fillStyle = '#5f9e86'; g.fillRect(0,0,cw-6,ch*0.15); pText(g, P.t, cw/2, ch*0.075, ch*0.06, '#fff', 800); P.draw(g, cw*0.06, ch*0.2, cw*0.88, ch*0.56); pText(g, P.cap, cw/2, ch*0.86, ch*0.035, PK.ink, 700); pText(g, '근거: '+P.src, cw/2, ch*0.94, ch*0.028, PK.mut, 500); g.restore(); }); return c.toDataURL(); }, scene, PERSP, POV, build:k=>{ buildRoom(k); roomHS(k); roomKey=k; place='room'; stage='room'; mode='play'; dlgClose(); player.root.position.set(ROOM_DOOR_U,0,-3.6); CAM.init=false; }, forceRoom:k=>{ result = predict(current); result.room = k; }, Q, get stage(){return stage;}, set stage(v){stage=v;}, get result(){return result;}, get current(){return current;}, set current(v){current=v;}, player:()=>player, HS:()=>HS, goUse, useDemo, enterRoom, exitRoom, ending, showResult, notes, CAM, walkTo, openNotebook, get mode(){return mode;}, set mode(v){mode=v;}, get demo(){return demo;}, get HIST(){return HIST;}, setFz};
+window.__dbg = {poof:()=>poofTransform(), posterSheet:()=>{ const ks = Object.keys(POSTERS); const cw = 420, ch = 504; const c = document.createElement('canvas'); c.width = cw*6; c.height = ch*Math.ceil(ks.length/6); const g = c.getContext('2d'); ks.forEach((k,i)=>{ const P = POSTERS[k]; g.save(); g.translate((i%6)*cw, Math.floor(i/6)*ch); g.fillStyle = PK.paper; g.fillRect(0,0,cw-6,ch-6); g.fillStyle = '#5f9e86'; g.fillRect(0,0,cw-6,ch*0.15); pText(g, P.t, cw/2, ch*0.075, ch*0.06, '#fff', 800); P.draw(g, cw*0.06, ch*0.2, cw*0.88, ch*0.56); pText(g, P.cap, cw/2, ch*0.86, ch*0.035, PK.ink, 700); pText(g, '근거: '+P.src, cw/2, ch*0.94, ch*0.028, PK.mut, 500); g.restore(); }); return c.toDataURL(); }, scene, PERSP, POV, build:k=>{ buildRoom(k); roomHS(k); roomKey=k; place='room'; stage='room'; mode='play'; dlgClose(); player.root.position.set(ROOM_DOOR_U,0,-3.6); CAM.init=false; }, forceRoom:k=>{ result = predict(current); result.room = k; }, Q, get stage(){return stage;}, set stage(v){stage=v;}, get result(){return result;}, get current(){return current;}, set current(v){current=v;}, player:()=>player, HS:()=>HS, goUse, useDemo, quiz, enterRoom, exitRoom, ending, showResult, notes, CAM, walkTo, openNotebook, get mode(){return mode;}, set mode(v){mode=v;}, get demo(){return demo;}, get HIST(){return HIST;}, setFz};
 
 /* ================= 통계 설명 · 지난 설명 ================= */
 function openStat(k){
@@ -2328,7 +2328,7 @@ function copyText(t, ok){ const fb = ()=>{ const ta = document.createElement('te
 function confirmBtn(b, fn){ let armed = false; const orig = b.textContent; b.onclick = ()=>{ if (!armed){ armed = true; b.textContent = '한 번 더 누르면 처음부터 시작해요'; setTimeout(()=>{ armed = false; b.textContent = orig; }, 4000); } else fn(); }; }
 function reportText(withVals){
   const R = ROOMS[roomKey || (result && result.room) || 'balance'], r = result || predict(current), L = [];
-  L.push('[인바디 미스터리 · 집현전 보건소 결과]', '');
+  L.push('[방탈출 게임: 인바디 미스터리 · 집현전 보건소 결과]', '');
   L.push(`■ 연구모형이 예측한 상대적 분류 유형: ${R.name} (교육용 분류, 진단 아님)`);
   L.push(`  DXA로 쟀다면 분류가 바뀔 확률 — 근육 ${pctTxt(r.pm)}, 체지방 ${pctTxt(r.pf)}`);
   if (withVals && current){ const RG = RANGES[`${r.sx}_${r.band}`] || {}; L.push(`  내 BIA 값: 근육지수 ${f1(r.smi)} kg/m²(같은 성별·연령대 ${RG.bia_smi ? pctPhrase(r.smi, RG.bia_smi) : '-'}), 체지방률 ${f1(current.pbf)}%(${RG.bia_pbf ? pctPhrase(current.pbf, RG.bia_pbf) : '-'}), BMI ${f1(r.bmi)}${Number.isFinite(current.wc) ? `, 허리둘레 ${f1(current.wc)} cm` : ''}`); }
@@ -2372,7 +2372,7 @@ async function reportImage(withVals){
 }
 function printReport(withVals){
   const r = result || predict(current), R = ROOMS[roomKey || r.room];
-  $('printArea').innerHTML = `<h1>인바디 미스터리 · 집현전 보건소 결과</h1><p>${R.no} · ${R.name} (교육용 분류, 진단 아님)</p>
+  $('printArea').innerHTML = `<h1>방탈출 게임: 인바디 미스터리 · 집현전 보건소 결과</h1><p>${R.no} · ${R.name} (교육용 분류, 진단 아님)</p>
     <p>DXA로 쟀다면 분류가 바뀔 확률: 근육 ${pctTxt(r.pm)}, 체지방 ${pctTxt(r.pf)}</p>
     ${withVals ? `<h2>내 수치는 어디쯤?</h2>${myGauges(current, r)}<h2>계산 과정</h2>${procHTML(current, r)}` : ''}
     <h2>자료 출처 · 대상자 수 · 가중치 · 단위 · 기준 문헌</h2>${dataInfoTable()}<p><b>꼭 읽어 주세요.</b> ${POS_NOTICE}</p>
@@ -2388,7 +2388,7 @@ function openShare(){
   openSheet(`<p class="eyebrow">SHARE</p><h2>링크로 공유</h2><p>이 게임 주소를 보내면 휴대폰에서도 바로 할 수 있어요.</p><p class="small" style="word-break:break-all">${shareUrl()}</p>
     <div class="acts"><button class="btn ghost sm" id="shCopy">링크 복사</button><button class="btn ghost sm" id="shShare">공유하기</button></div>`, {close:true, onClose: saved ? ()=>popSheet(saved) : null});
   $('shCopy').onclick = ()=>copyText(shareUrl(), '링크를 복사했어요');
-  $('shShare').onclick = async ()=>{ try { await navigator.share({title:'인바디 미스터리', text:'집현전 보건소 방탈출: 숫자 너머 내 몸 바로알기', url:shareUrl()}); } catch(e){ copyText(shareUrl(), '공유 창 대신 링크를 복사했어요'); } };
+  $('shShare').onclick = async ()=>{ try { await navigator.share({title:'방탈출 게임: 인바디 미스터리', text:'집현전 보건소 방탈출 게임: 인바디 미스터리 · 숫자 너머 내 몸 바로알기', url:shareUrl()}); } catch(e){ copyText(shareUrl(), '공유 창 대신 링크를 복사했어요'); } };
 }
 function deliver(){
   stage = 'end'; chapter('CHAPTER 11 · TAKE HOME', '결과 받아보기', '이미지·인쇄·텍스트로 결과를 가져가세요.'); pill('11 — 보건소 로비 · 결과 받아보기');
@@ -2401,12 +2401,12 @@ function deliver(){
     <div class="nav"><button class="btn ghost" id="dvPrev">‹ 다짐으로</button><button class="btn ghost" id="dvNote">탐험 수첩</button><button class="btn" id="dvAgain">처음부터 다시</button></div>`, {wide:true, close:true, onClose:()=>{ objective('수고하셨어요! 보건소장님이나 간호사에게 가면 결과를 다시 받을 수 있어요.'); play(); }});
   let blob = null;
   $('repImgBtn').onclick = async ()=>{ const cv = await reportImage($('withVals').checked); const url = cv.toDataURL('image/png'); $('repImg').src = url; $('repWrap').hidden = false; cv.toBlob(b=>blob = b, 'image/png'); $('repWrap').scrollIntoView({behavior:'smooth', block:'start'}); };
-  $('repImgShare').onclick = async ()=>{ try { await navigator.share({files:[new File([blob], 'inbody-mystery-result.png', {type:'image/png'})], title:'인바디 미스터리 결과'}); } catch(e){ toast('공유를 열 수 없어요. 이미지를 길게 눌러 저장해 주세요'); } };
+  $('repImgShare').onclick = async ()=>{ try { await navigator.share({files:[new File([blob], 'inbody-mystery-result.png', {type:'image/png'})], title:'방탈출 게임: 인바디 미스터리 결과'}); } catch(e){ toast('공유를 열 수 없어요. 이미지를 길게 눌러 저장해 주세요'); } };
   $('repDl').onclick = ()=>{ if (blob) saveFile('inbody-mystery-result.png', blob); else toast('잠시 후 다시 눌러 주세요'); };
   $('repTxt').onclick = ()=>saveFile('inbody-mystery-result.txt', reportText($('withVals').checked));
   $('repPrint').onclick = ()=>printReport($('withVals').checked);
   $('repCopy').onclick = ()=>copyText(reportText($('withVals').checked), '결과 내용을 복사했어요');
-  $('repShare').onclick = async ()=>{ try { await navigator.share({title:'인바디 미스터리 결과', text:reportText($('withVals').checked)}); } catch(e){ copyText(reportText($('withVals').checked), '공유 창 대신 내용을 복사했어요'); } };
+  $('repShare').onclick = async ()=>{ try { await navigator.share({title:'방탈출 게임: 인바디 미스터리 결과', text:reportText($('withVals').checked)}); } catch(e){ copyText(reportText($('withVals').checked), '공유 창 대신 내용을 복사했어요'); } };
   $('dlCopyLink').onclick = ()=>copyText(shareUrl(), '링크를 복사했어요');
   $('dvPrev').onclick = ()=>{ sheetOnClose = null; pledgeCard(); }; $('dvNote').onclick = ()=>openNotebook('cards');
   confirmBtn($('dvAgain'), ()=>{ sheetOnClose = null; closeSheet(); restart(); });

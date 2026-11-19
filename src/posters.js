@@ -20,7 +20,7 @@ const POSTERS = {
     pText(c, 'DXA: X선 흡수', x + w*0.75, y + h*0.04, h*0.065); }},
   agree100:{t:'인바디 해당군 100명 중', cap:'31~38명은 DXA로는 해당하지 않았어요', src:'본 연구 · 국민건강영양조사 2024', draw:(c,x,y,w,h)=>{ pIcons(c, x + w*0.05, y, w*0.9, 100, 34, PK.coral, PK.sage, 10, h); }},
   issues4:{t:'체성분 숫자의 4가지 사회문제', cap:'집현전이 찾은 숙제', src:'본 연구', draw:(c,x,y,w,h)=>{
-    [['①','수치 맹신',PK.coral],['②','검사 접근성',PK.blue],['③','잘못된 정보',PK.yel],['④','체형 편견',PK.lav]].forEach(([n,t,col],i)=>{ const cx = x + (i%2)*w/2, cy = y + Math.floor(i/2)*h/2;
+    [['①','숫자 미스터리',PK.coral],['②','검사 접근성',PK.blue],['③','잘못된 정보',PK.yel],['④','체형 편견',PK.lav]].forEach(([n,t,col],i)=>{ const cx = x + (i%2)*w/2, cy = y + Math.floor(i/2)*h/2;
       c.fillStyle = col; rr(c, cx + w*0.03, cy + h*0.03, w*0.44, h*0.44, 14); c.fill(); pText(c, n, cx + w*0.25, cy + h*0.18, h*0.13, '#fff', 800); pText(c, t, cx + w*0.25, cy + h*0.35, h*0.075, '#fff', 700); }); }},
   measure:{t:'정확한 측정 체크리스트', cap:'삽입형 의료기기(심장박동기 등) 착용 시 측정 금지', src:'인바디 측정 유의사항 · Kyle 2004 II', draw:(c,x,y,w,h)=>{
     ['오전 · 공복 · 운동 전','측정 전 화장실','가벼운 옷 · 금속 제거','상온에서 측정','사우나·목욕 직후 피하기'].forEach((t,i)=>{ const yy = y + h*(0.08 + i*0.2); c.strokeStyle = PK.green; c.lineWidth = h*0.018; c.strokeRect(x + w*0.08, yy - h*0.06, h*0.12, h*0.12);
