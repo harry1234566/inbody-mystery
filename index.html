@@ -338,6 +338,12 @@ svg.keyi{width:20px;height:20px;fill:none;stroke:#d9a521;stroke-width:2.6;stroke
 body.playing #jumpBtn{display:grid;place-items:center}
 #jumpBtn:active{transform:scale(.92)}
 @media (pointer:fine) and (min-width:761px){ #jumpBtn{bottom:calc(var(--safeB) + 24px);right:24px} }
+#avPrev{position:fixed;z-index:10;right:calc(max(20px,env(safe-area-inset-right)) + 440px);top:calc(var(--safeT) + 90px);width:300px;height:420px;border-radius:24px;background:radial-gradient(circle at 50% 38%,#fffdf8 0%,#f3eee3 70%);border:1px solid var(--line);box-shadow:0 10px 30px rgba(31,43,38,.12);overflow:hidden}
+#avPrev[hidden]{display:none}
+#avPrev canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#avPrev span{position:absolute;left:14px;top:10px;font:700 calc(12px*var(--fz)) var(--kr);color:#2f6f5e;letter-spacing:.04em;z-index:1}
+@media (min-width:761px) and (max-width:1100px){ #avPrev{width:230px;height:330px} }
+@media (max-width:760px){ #avPrev{left:10px;right:10px;width:auto;height:auto;top:calc(var(--safeT) + 64px);bottom:calc(var(--safeB) + 20px + 50vh);border-radius:20px} body.avon #chap{display:none} }
 #poof{position:fixed;left:0;top:0;z-index:7;pointer-events:none;transform:translate(-50%,-50%);display:none}
 #poof.on{display:block;animation:poof 1.3s ease-out forwards}
 #poof b{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-8deg);font:900 calc(46px*var(--fz)) var(--kr);color:#fff;-webkit-text-stroke:2px #c2452f;text-shadow:0 4px 0 #c2452f;white-space:nowrap}
@@ -427,7 +433,7 @@ body.playing #jumpBtn{display:grid;place-items:center}
 <div id="toast" role="status"></div>
 <div id="fade"></div>
 <button id="jumpBtn" type="button" aria-label="점프">점프</button>
-<div id="poof" aria-hidden="true"><svg width="260" height="260" viewBox="0 0 260 260"><polygon points="130,8 152,82 228,52 180,112 252,140 176,154 206,232 140,180 110,252 98,174 20,206 72,140 8,110 84,96 46,30 116,70" fill="#f2c14e" stroke="#c2452f" stroke-width="5" stroke-linejoin="round"/></svg><b>펑!</b></div>
+<div id="poof" aria-hidden="true"><svg width="260" height="260" viewBox="0 0 260 260"><polygon points="130,8 152,82 228,52 180,112 252,140 176,154 206,232 140,180 110,252 98,174 20,206 72,140 8,110 84,96 46,30 116,70" fill="#f2c14e" stroke="#c2452f" stroke-width="5" stroke-linejoin="round"/></svg></div>
 <div id="printArea"></div>
 <div id="loading"><div class="in"><i>+</i><b>보건소 문을 열고 있어요</b><span>방탈출 게임: 인바디 미스터리</span></div></div>
 
@@ -644,7 +650,7 @@ const Q = {
  M3:{issue:'③', name:'고장 난 운동 안내판', title:'SNS 속설: "근육은 젊을 때만 생긴다"?', kind:'short',
   q:()=>'안내판 숫자가 지워졌어요. 빈칸을 채워 고쳐 주세요.', sign:'근력운동은 나이와 관계없이 성인에게 주 [ ]일 이상 권장됩니다.',
   short:['2','2일','2회','두','둘','이틀'], ansText:'2', chips:['1','2','3','5','7'],
-  hint:'일주일에 이틀이에요. 숫자로 적어 주세요.',
+  hint:'WHO 신체활동 지침에서 근력운동은 일주일에 며칠 이상 권하는지 떠올려 보세요. 숫자를 골라 주세요.',
   ok:()=>'WHO는 성인과 노인 모두에게 주 2일 이상 근력 강화 활동을 권해요. 65세 이상은 균형·근력 운동을 섞어 주 3일 이상 하도록 권해요. 나이 들어서 시작해도 늦지 않아요.',
   lesson:'근력운동은 나이와 관계없이 주 2일 이상(65세 이상은 균형 포함 주 3일).',
   camp:'"나이 들면 근육은 포기"라는 잘못된 정보 대신, 연령별 근력운동 안내를 공공 캠페인으로 알리자고 제안해요.', refs:[6]},
@@ -1052,7 +1058,8 @@ function makePerson(o){
   const part = (r, ps, pl, ts, tl, x=0, y=0.02, z=-0.01) => add(new THREE.SphereGeometry(r, 30, 20, ps, pl, ts, tl), hm, x, y, z, head);
   const cap = (th, r=Rh) => part(r, 0, Math.PI*2, 0, th);
   const back = (th, r=Rh) => part(r, Math.PI, Math.PI, 0, th);
-  const st = o.style;
+  const st = o.hat==='none' ? o.style : 'hidden'; /* 모자를 쓰면 머리카락은 그리지 않음 */
+  if (st==='hidden' && !['bald','none'].includes(o.style)) back(1.85, R*1.02); /* 모자 아래로 밀어 넣은 짧은 뒷머리: 모자 밖으로 나오지 않음 */
   if (st==='short'){ cap(1.12); back(1.95); add(sph(0.16,14,10), hm, 0.1, 0.3, 0.24, head).scale.set(1.5,0.55,0.8); }
   if (st==='buzz'){ cap(1.2, R*1.02); back(1.85, R*1.02); }
   if (st==='part'){ cap(1.15); back(2.0); add(sph(0.2,14,10), hm, -0.15, 0.27, 0.22, head).scale.set(1.35,0.5,0.85); }
@@ -1561,6 +1568,7 @@ function rebuildPlayer(){
   const pos = player ? player.root.position.clone() : new THREE.Vector3(-1.5,0,3.2), f = player ? player.facing : Math.PI/4;
   if (player && player.root.parent) player.root.parent.remove(player.root);
   player = makePerson(avOpts()); player.root.position.copy(pos); player.facing = f; player.path = []; world.add(player.root);
+  if (window.__PV && window.__PV.on) window.__PV.set();
 }
 
 /* ================= 화면 도우미 ================= */
@@ -1660,7 +1668,7 @@ function setSafe(){
   const top = MOBILE ? 150 : 120;
   let b = MOBILE ? 50 : 80, r = 20;
   if (!d.hidden) b = Math.max(b, d.offsetHeight + (MOBILE ? 20 : 90));
-  if (!side.hidden){ if (MOBILE) b = side.offsetHeight + 20; else r = side.offsetWidth + 40; }
+  if (!side.hidden){ if (MOBILE) b = side.offsetHeight + 20; else { const pv = document.getElementById('avPrev'); r = side.offsetWidth + 40 + (pv && !pv.hidden ? pv.offsetWidth + 20 : 0); } }
   CAM.safe = {t: side.hidden ? top : (MOBILE ? 70 : 100), b, l: MOBILE ? 10 : 30, r, fitB: MOBILE ? b : 24};
 }
 new ResizeObserver(()=>setSafe()).observe($('dlg'));
@@ -1807,11 +1815,11 @@ function toAvatar(){
   const band = Number.isFinite(current.age) ? bandOf(current.age) : '40-49';
   Object.assign(av, {style: sexA===1 ? 'short' : 'bob', hair: band==='65+' ? 6 : band==='50-64' ? 4 : 1, wrinkle: band==='65+', beard:'none', bottom:'pants'});
   rebuildPlayer(); player.root.position.set(-0.7, 0, 1.0); player.path = []; player.facing = Math.PI/4;
-  avTab = 'body'; renderAv(); $('side').hidden = false; dlgClose(); setSafe(); CAM.mode = 'close';
+  avTab = 'body'; renderAv(); $('side').hidden = false; PV.show(true); dlgClose(); setSafe(); CAM.mode = 'close';
   chapter('CHAPTER 03 · MY CARD', '진료 카드 만들기', '나를 닮은 모습으로 꾸며 보세요.'); pill('03 — 보건소 로비 · 진료 카드');
 }
-$('avBack').onclick = ()=>{ $('side').hidden = true; CAM.mode = 'room'; setSafe(); stage = 'intro'; if (demo) openConsent(); else openReception(); };
-$('avDone').onclick = ()=>{ $('side').hidden = true; CAM.mode = 'room'; setSafe(); PIC.me = portrait(avOpts()); toWaiting(); };
+$('avBack').onclick = ()=>{ $('side').hidden = true; PV.show(false); CAM.mode = 'room'; setSafe(); stage = 'intro'; if (demo) openConsent(); else openReception(); };
+$('avDone').onclick = ()=>{ $('side').hidden = true; PV.show(false); CAM.mode = 'room'; setSafe(); PIC.me = portrait(avOpts()); toWaiting(); };
 
 /* ================= 조사 지점 ================= */
 const ICON = {
@@ -2015,17 +2023,17 @@ function roomHS(k){
   addHS({id:'exit', icon:'door', label:()=>`출구 · 🔑 ${R.qs.filter(id=>Q[id].solved).length}/4`, pos:[ROOM_DOOR_U, 3.35, -4.9], stand:[ROOM_DOOR_U, -3.75], look:[ROOM_DOOR_U,-5],
     lock:()=>!R.qs.every(id=>Q[id].solved), lockMsg:()=>'미션 4개를 풀어 열쇠를 모두 모으면 문이 열려요', main:()=>R.qs.every(id=>Q[id].solved), use:exitRoom});
 }
-function updateKeys(){ if (!roomKey) return; const n = ROOMS[roomKey].qs.filter(id=>Q[id].solved).length; [...$('keyChip').querySelectorAll('i')].forEach((el,i)=>el.classList.toggle('on', i<n));
-  if (DOORS.slots) DOORS.slots.forEach((m,i)=>{ m.color.copy(lin(i<n ? '#f2c14e' : '#bfb49a')); m.emissive = lin(i<n ? '#8a6420' : '#000000'); }); }
+function updateKeys(){ if (!roomKey) return; const qs = ROOMS[roomKey].qs; [...$('keyChip').querySelectorAll('i')].forEach((el,i)=>{ const on = !!(qs[i] && Q[qs[i]].solved); el.classList.toggle('on', on); el.title = `${i+1}번 미션 열쇠${on?' (획득)':''}`; });
+  if (DOORS.slots) DOORS.slots.forEach((m,i)=>{ const on = !!(qs[i] && Q[qs[i]].solved); m.color.copy(lin(on ? '#f2c14e' : '#bfb49a')); m.emissive = lin(on ? '#8a6420' : '#000000'); }); }
 async function exitRoom(){
   mode = 'busy'; toast('🔑 열쇠 4개가 맞춰졌어요. 문이 열립니다!'); await sleep(500); await openDoor(DOORS.exit, 1); await walkTo(ROOM_DOOR_U, -4.75); await fade(true);
   const k = roomKey; place = 'lobby'; buildLobby(); lobbyHS(); const d = DOORS[k]; d.open = 1; d.piv.rotation.y = -1.35; const L = d.side==='L';
   player.root.position.set(L ? -7.2 : d.u, 0, L ? d.u : -5.2); player.facing = L ? Math.PI/2 : 0; player.path = [];
-  doctor.root.visible = true; $('keyChip').hidden = true; stage = 'doctor'; CAM.init = false; updateCamera(0); await fade(false);
+  doctor.root.visible = true; blockC(-2.4, -1.7, 0.28, 0.28); computeGrid(); $('keyChip').hidden = true; stage = 'doctor'; CAM.init = false; updateCamera(0); await fade(false);
   chapter('CHAPTER 07 · THE PROPOSAL', '제안서 전달', '보건소장님께 정책 제안서를 전해 주세요.'); pill('07 — 보건소 로비 · 보건소장실 앞');
   await walkTo(L ? -6.2 : d.u, L ? d.u : -4.3); openDoor(d, 0);
   await poofTransform();
-  await say('간호사', '펑! 열쇠 4개를 모두 모은 덕분에 한결 건강해진 모습이에요. 꾸준한 실천으로 만들 수 있는 <b>미래의 나</b>예요. 다만 진짜 건강은 겉모습이 아니라 근력, 허리둘레, 혈액 지표처럼 몸 안을 함께 봐야 알 수 있어요. 이제 보건소장님께 제안서를 전해 주세요.', {btns:['제안서 들고 가기']}); play();
+  await say('간호사', '열쇠 4개를 모두 모은 덕분에 한결 건강해진 모습이에요. 꾸준한 실천으로 만들 수 있는 <b>미래의 나</b>예요. 다만 진짜 건강은 겉모습이 아니라 근력, 허리둘레, 혈액 지표처럼 몸 안을 함께 봐야 알 수 있어요. 이제 보건소장님께 제안서를 전해 주세요.', {btns:['제안서 들고 가기']}); play();
 }
 
 /* ================= 마무리: 내 결과 → 내 제안서 → 사회문제 → 보건소 실천 계획 → 팀 ================= */
@@ -2075,11 +2083,10 @@ async function ending(){
 function survey(){
   stage = 'end'; player.wave = true; chapter('CHAPTER 09 · YOUR VOICE', '체험 평가', '1분이면 끝나요.'); pill('09 — 보건소 로비 · 체험 평가');
   const opt = (k, arr, h) => `<div class="chips${h?' h':''}" data-k="${k}">${arr.map((a,i)=>`<button type="button" data-i="${i}" aria-pressed="${sv[k]===i}">${a}</button>`).join('')}</div>`;
-  openSheet(`<p class="eyebrow">CHAPTER 09 · YOUR VOICE</p><h2>체험 평가 (1분)</h2><p class="small">팀이 퀴즈 난이도와 메시지 전달을 개선하는 데 써요. 건강 수치는 들어가지 않아요.</p>
-    <div class="qlab">1. 퀴즈 난이도는 어땠나요?</div>${opt('level',['쉬웠어요','적당했어요','어려웠어요'],true)}
-    <div class="qlab">2. 인바디와 DXA 결과가 다를 수 있는 이유를 이해했나요?</div>${opt('under',['잘 이해했어요','조금 이해했어요','잘 모르겠어요'],true)}
-    <div class="qlab">3. 가장 기억에 남는 사회문제는?</div>${opt('msg',ISSUES.map(x=>x.k+' '+x.name))}
-    <div class="qlab">4. 가장 필요하다고 생각하는 변화는?</div>${opt('act',['개인: 같은 조건에서 재고, 근력·허리둘레 함께 보기','지역사회: 보건소 체성분 검사에 근력 검사·운동교실 연계','보건정책: 결과지 표준 안내와 검진 상담 연계'])}
+  openSheet(`<p class="eyebrow">CHAPTER 09 · YOUR VOICE</p><h2>체험 평가 (1분)</h2><p class="small">오늘 알게 된 것을 스스로 점검해 보는 문항이에요. 응답은 어디에도 저장·전송되지 않아요.</p>
+    <div class="qlab">1. 인바디와 DXA 결과가 다를 수 있는 이유를 이해했나요?</div>${opt('under',['잘 이해했어요','조금 이해했어요','잘 모르겠어요'],true)}
+    <div class="qlab">2. 가장 기억에 남는 사회문제는?</div>${opt('msg',ISSUES.map(x=>x.k+' '+x.name))}
+    <div class="qlab">3. 가장 필요하다고 생각하는 변화는?</div>${opt('act',['개인: 같은 조건에서 재고, 근력·허리둘레 함께 보기','지역사회: 보건소 체성분 검사에 근력 검사·운동교실 연계','보건정책: 결과지 표준 안내와 검진 상담 연계'])}
     <div class="nav"><button class="btn ghost" id="svPrev">‹ 이전</button><button class="btn" id="svDone">다짐 고르기 ›</button></div>`, {wide:true});
   $('panel').querySelectorAll('.chips').forEach(g=>g.querySelectorAll('button').forEach(b=>b.onclick=()=>{ g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); sv[g.dataset.k] = +b.dataset.i; }));
   $('svPrev').onclick = ()=>pager(4, survey); $('svDone').onclick = pledgeCard;
@@ -2087,19 +2094,19 @@ function survey(){
 function recordText(){
   const sec = Math.round((performance.now()-(log.start||performance.now()))/1000), m = Math.floor(sec/60), s = sec%60;
   const L = ['쉬움','적당','어려움'], U = ['잘 이해','조금 이해','모름'], A = ['개인','지역사회','보건정책'];
-  return `[방탈출 게임: 인바디 미스터리 체험 기록] 방: ${ROOMS[roomKey].name}${demo?'(체험 모드)':''} | 소요 ${m}분 ${s}초 | 퀴즈 ${log.quizzes}개 중 첫 시도 정답 ${log.firstTry}개, 오답 ${log.wrong}회 | 단서 ${notes.length}개 | 난이도: ${sv.level==null?'-':L[sv.level]} | 이해: ${sv.under==null?'-':U[sv.under]} | 기억에 남는 문제: ${sv.msg==null?'-':ISSUES[sv.msg].name} | 필요한 변화: ${sv.act==null?'-':A[sv.act]} | 문항별 시도·초: ${log.hints.map(h=>`${h.id}:${h.tries}/${h.sec}s`).join(',')}`;
+  return `[방탈출 게임: 인바디 미스터리 체험 기록] 방: ${ROOMS[roomKey].name}${demo?'(체험 모드)':''} | 소요 ${m}분 ${s}초 | 퀴즈 ${log.quizzes}개 중 첫 시도 정답 ${log.firstTry}개, 오답 ${log.wrong}회 | 단서 ${notes.length}개 | 이해: ${sv.under==null?'-':U[sv.under]} | 기억에 남는 문제: ${sv.msg==null?'-':ISSUES[sv.msg].name} | 필요한 변화: ${sv.act==null?'-':A[sv.act]} | 문항별 시도·초: ${log.hints.map(h=>`${h.id}:${h.tries}/${h.sec}s`).join(',')}`;
 }
 const pledged = new Set([0]);
 function pledgeCard(){
   const R = ROOMS[roomKey];
   chapter('CHAPTER 10 · MY PLEDGE', '나의 다짐', '다짐을 고르고 결과를 받아 가세요.'); pill('10 — 보건소 로비 · 나의 다짐');
   openSheet(`<p class="eyebrow">CHAPTER 10 · MY PLEDGE</p><h2>나의 건강관리 다짐</h2><p class="small">제안서의 "개인" 단계는 방문자님의 실천에서 시작돼요. "${R.camp}"에 함께할 다짐을 골라 주세요.</p><div class="chips" id="chips"></div>
-    <details class="box"><summary>체험 기록 보기 (팀 파일럿 테스트용)</summary><p class="small" id="recTxt" style="margin:6px 0;word-break:break-all"></p><button class="btn ghost sm" id="copyRec">기록 복사</button></details>
+    <details class="box"><summary>체험 기록 보기 (팀 파일럿 테스트용)</summary><p class="small" id="recTxt" style="margin:6px 0;word-break:break-all"></p><button class="btn ghost sm" id="copyRec">기록 텍스트 파일로 저장</button></details>
     <div class="nav"><button class="btn ghost" id="plPrev">‹ 이전</button><button class="btn" id="plNext">결과 받아보기 ›</button></div>`, {wide:true});
   R.pledges.forEach((p,i)=>{ const b = document.createElement('button'); b.textContent = p; b.setAttribute('aria-pressed', String(pledged.has(i)));
     b.onclick = ()=>{ pledged.has(i) ? pledged.delete(i) : pledged.add(i); b.setAttribute('aria-pressed', String(pledged.has(i))); }; $('chips').appendChild(b); });
   $('recTxt').textContent = recordText();
-  $('copyRec').onclick = ()=>copyText(recordText(), '기록을 복사했어요');
+  $('copyRec').onclick = ()=>saveFile('inbody-mystery-record.txt', recordText());
   $('plPrev').onclick = survey; $('plNext').onclick = ()=>{ if (!pledged.size){ toast('다짐을 하나 이상 골라 주세요'); return; } deliver(); };
 }
 function restart(){
@@ -2185,11 +2192,10 @@ $('helpBtn').onclick = ()=>{
     <div class="qlab">글씨 크기</div><div class="seg" style="margin:6px 0 10px">${FZ.map(([z,l],i)=>`<button type="button" data-fz="${i}" aria-pressed="${i===fzI}">${l}</button>`).join('')}</div>
     <label class="check"><input type="checkbox" id="ttsChk" ${ttsOn?'checked':''}> 음성 안내 켜기 (화면의 글을 읽어 줘요)</label>
     <label class="check"><input type="checkbox" id="povChk" ${povEnabled?'checked':''}> 조사할 때 캐릭터 시점으로 가까이 보기</label>
-    <div class="acts"><button class="btn ghost" id="hpShare">링크로 공유</button><button class="btn ghost" id="hpAgain">처음부터 다시 하기</button></div>
+    <div class="acts"><button class="btn ghost" id="hpAgain">처음부터 다시 하기</button></div>
     <p class="small">교육·캠페인용 체험이며 의학적 진단이 아닙니다. 입력값은 저장하지 않아요. TEAM 집현전 · 성균관대학교 2026-2 융합연구학점제</p>`, {close:true, onClose: saved ? ()=>popSheet(saved) : null});
   $('panel').querySelectorAll('[data-fz]').forEach(b=>b.onclick = ()=>setFz(+b.dataset.fz));
   $('povChk').onchange = e=>{ povEnabled = e.target.checked; };
-  $('hpShare').onclick = ()=>openShare();
   confirmBtn($('hpAgain'), ()=>{ sheetOnClose = null; closeSheet(); restart(); });
   $('ttsChk').onchange = e=>{ if (!ttsOK){ toast('이 브라우저에서는 음성 안내를 지원하지 않아요'); e.target.checked = false; return; } ttsOn = e.target.checked; if (ttsOn) speak('음성 안내를 켰어요.'); else try { speechSynthesis.cancel(); } catch(_){} };
 };
@@ -2253,6 +2259,28 @@ function step(dt){
     player.walking = true; player.facing = lerpAngle(player.facing, Math.atan2(mx, mz), Math.min(1, dt*14)); marker.visible = false; }
   else if (!stepPath(dt)){ player.walking = false; marker.visible = false; }
 }
+/* ================= 캐릭터 꾸미기 미리보기 (확대·천천히 회전) ================= */
+const PV = (()=>{
+  const wrap = document.createElement('div'); wrap.id = 'avPrev'; wrap.hidden = true; wrap.setAttribute('aria-hidden','true');
+  wrap.innerHTML = '<span>미리보기</span>'; document.body.appendChild(wrap);
+  const r = new THREE.WebGLRenderer({antialias:true, alpha:true}); r.setPixelRatio(Math.min(window.devicePixelRatio||1, 2)); r.outputEncoding = THREE.sRGBEncoding; r.setClearColor(0x000000, 0); wrap.appendChild(r.domElement);
+  const sc = new THREE.Scene(); sc.add(new THREE.HemisphereLight(0xfffdf6, 0xe4dccb, 0.95));
+  const k1 = new THREE.DirectionalLight(0xfff1dc, 0.7); k1.position.set(-3, 6, 5); sc.add(k1);
+  const k2 = new THREE.DirectionalLight(0xe8f0ff, 0.28); k2.position.set(4, 3, -4); sc.add(k2);
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.05, 48), new THREE.MeshStandardMaterial({color:lin('#e6dfcf'), roughness:0.95})); disc.position.y = -0.03; sc.add(disc);
+  const cam = new THREE.PerspectiveCamera(28, 1, 0.1, 60); let person = null, ang = -0.5, top = 2, mid = 1;
+  const api = { on:false, wrap,
+    set(){ if (person) sc.remove(person.root); person = makePerson(avOpts()); person.facing = ang; sc.add(person.root);
+      person.root.rotation.y = 0; person.root.updateMatrixWorld(true); const bb = new THREE.Box3().setFromObject(person.root); top = bb.max.y; mid = top/2; },
+    show(v){ api.on = !!v; wrap.hidden = !v; document.body.classList.toggle('avon', !!v); if (v) api.set(); },
+    frame(dt, now){ if (!api.on || !person) return; const w = wrap.clientWidth, h = wrap.clientHeight; if (!w || !h) return;
+      const pr = r.getPixelRatio(); if (r.domElement.width !== Math.round(w*pr) || r.domElement.height !== Math.round(h*pr)) r.setSize(w, h, false);
+      ang += dt*0.55; person.facing = ang; person.walking = false; animPerson(person, dt, now);
+      cam.aspect = w/h; const need = Math.max(top*1.18, (top*1.18)*0.62/cam.aspect); const d = (need/2)/Math.tan(cam.fov*Math.PI/360);
+      cam.position.set(0, mid + top*0.08, d); cam.lookAt(0, mid, 0); cam.updateProjectionMatrix(); r.render(sc, cam); }
+  };
+  window.__PV = api; return api;
+})();
 function frame(){
   const dt = Math.min(clock3.getDelta(), 0.05); T += dt; const now = performance.now();
   for (let i=tasks.length-1;i>=0;i--){ const k = tasks[i]; k.t += dt; const p = Math.min(1, k.t/k.dur); k.fn(p); if (p>=1){ tasks.splice(i,1); k.res(); } }
@@ -2267,7 +2295,7 @@ function frame(){
   if (nurse && player && place==='lobby'){ nurse.facing = lerpAngle(nurse.facing, Math.atan2(player.root.position.x-nurse.root.position.x, player.root.position.z-nurse.root.position.z)*0.5, dt*2); }
   if (marker.visible) marker.material.opacity = 0.5 + Math.sin(T*6)*0.25;
   updateCamera(dt); updateHS();
-  updatePOV(); renderer.render(scene, POV.on ? PERSP : camera); requestAnimationFrame(frame);
+  updatePOV(); renderer.render(scene, POV.on ? PERSP : camera); PV.frame(dt, now); requestAnimationFrame(frame);
 }
 
 /* ================= 시작 ================= */
@@ -2277,7 +2305,7 @@ PIC.nurse = portrait(NPC_N); PIC.doctor = portrait(NPC_D);
 $('hud').hidden = false; setSafe(); CAM.init = false;
 frame();
 setTimeout(()=>{ $('loading').classList.add('off'); setTimeout(()=>$('loading').hidden = true, 700); introHint(); }, 500);
-window.__dbg = {poof:()=>poofTransform(), posterSheet:()=>{ const ks = Object.keys(POSTERS); const cw = 420, ch = 504; const c = document.createElement('canvas'); c.width = cw*6; c.height = ch*Math.ceil(ks.length/6); const g = c.getContext('2d'); ks.forEach((k,i)=>{ const P = POSTERS[k]; g.save(); g.translate((i%6)*cw, Math.floor(i/6)*ch); g.fillStyle = PK.paper; g.fillRect(0,0,cw-6,ch-6); g.fillStyle = '#5f9e86'; g.fillRect(0,0,cw-6,ch*0.15); pText(g, P.t, cw/2, ch*0.075, ch*0.06, '#fff', 800); P.draw(g, cw*0.06, ch*0.2, cw*0.88, ch*0.56); pText(g, P.cap, cw/2, ch*0.86, ch*0.035, PK.ink, 700); pText(g, '근거: '+P.src, cw/2, ch*0.94, ch*0.028, PK.mut, 500); g.restore(); }); return c.toDataURL(); }, scene, PERSP, POV, build:k=>{ buildRoom(k); roomHS(k); roomKey=k; place='room'; stage='room'; mode='play'; dlgClose(); player.root.position.set(ROOM_DOOR_U,0,-3.6); CAM.init=false; }, forceRoom:k=>{ result = predict(current); result.room = k; }, Q, get stage(){return stage;}, set stage(v){stage=v;}, get result(){return result;}, get current(){return current;}, set current(v){current=v;}, player:()=>player, HS:()=>HS, goUse, useDemo, quiz, enterRoom, exitRoom, ending, showResult, notes, CAM, walkTo, openNotebook, get mode(){return mode;}, set mode(v){mode=v;}, get demo(){return demo;}, get HIST(){return HIST;}, setFz};
+window.__dbg = {poof:()=>poofTransform(), posterSheet:()=>{ const ks = Object.keys(POSTERS); const cw = 420, ch = 504; const c = document.createElement('canvas'); c.width = cw*6; c.height = ch*Math.ceil(ks.length/6); const g = c.getContext('2d'); ks.forEach((k,i)=>{ const P = POSTERS[k]; g.save(); g.translate((i%6)*cw, Math.floor(i/6)*ch); g.fillStyle = PK.paper; g.fillRect(0,0,cw-6,ch-6); g.fillStyle = '#5f9e86'; g.fillRect(0,0,cw-6,ch*0.15); pText(g, P.t, cw/2, ch*0.075, ch*0.06, '#fff', 800); P.draw(g, cw*0.06, ch*0.2, cw*0.88, ch*0.56); pText(g, P.cap, cw/2, ch*0.86, ch*0.035, PK.ink, 700); pText(g, '근거: '+P.src, cw/2, ch*0.94, ch*0.028, PK.mut, 500); g.restore(); }); return c.toDataURL(); }, scene, PERSP, POV, build:k=>{ buildRoom(k); roomHS(k); roomKey=k; place='room'; stage='room'; mode='play'; dlgClose(); player.root.position.set(ROOM_DOOR_U,0,-3.6); CAM.init=false; }, forceRoom:k=>{ result = predict(current); result.room = k; }, Q, get stage(){return stage;}, set stage(v){stage=v;}, get result(){return result;}, get current(){return current;}, set current(v){current=v;}, player:()=>player, HS:()=>HS, goUse, useDemo, quiz, enterRoom, updateKeys, deliver, walkable, get roomKey(){return roomKey;}, set roomKey(v){roomKey=v;}, exitRoom, ending, showResult, notes, CAM, walkTo, openNotebook, get mode(){return mode;}, set mode(v){mode=v;}, get demo(){return demo;}, get HIST(){return HIST;}, setFz};
 
 /* ================= 통계 설명 · 지난 설명 ================= */
 function openStat(k){
@@ -2322,9 +2350,7 @@ function renderInfo(){
 function showInfo(){ $('infoCard').hidden = false; $('infoBtn').hidden = false; infoOpen = !MOBILE; renderInfo(); }
 $('infoBtn').onclick = ()=>{ const saved = pushSheet(); openSheet(`<p class="eyebrow">MY CARD</p><h2>내 정보와 데이터의 의미</h2>${infoBody(true)}`, {close:true, wide:true, onClose: saved ? ()=>popSheet(saved) : null}); bindInfo($('panel')); };
 
-/* ================= 결과 받아보기: 이미지 · 인쇄 · 텍스트 · 공유 ================= */
-function copyText(t, ok){ const fb = ()=>{ const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); toast(ok); } catch(e){ toast('복사하지 못했어요. 길게 눌러 복사해 주세요'); } ta.remove(); };
-  try { navigator.clipboard.writeText(t).then(()=>toast(ok), fb); } catch(e){ fb(); } }
+/* ================= 결과 받아보기: 리포트 이미지 · 텍스트 파일 ================= */
 function confirmBtn(b, fn){ let armed = false; const orig = b.textContent; b.onclick = ()=>{ if (!armed){ armed = true; b.textContent = '한 번 더 누르면 처음부터 시작해요'; setTimeout(()=>{ armed = false; b.textContent = orig; }, 4000); } else fn(); }; }
 function reportText(withVals){
   const R = ROOMS[roomKey || (result && result.room) || 'balance'], r = result || predict(current), L = [];
@@ -2370,44 +2396,19 @@ async function reportImage(withVals){
   g.fillStyle = '#8a948d'; g.font = `500 22px ${FONT}`; g.fillText('교육·캠페인용이며 의학적 진단이 아닙니다', W/2, y+150); g.fillText('TEAM 집현전 · 성균관대 2026-2 URP', W/2, y+190); g.textAlign = 'left';
   return cv;
 }
-function printReport(withVals){
-  const r = result || predict(current), R = ROOMS[roomKey || r.room];
-  $('printArea').innerHTML = `<h1>방탈출 게임: 인바디 미스터리 · 집현전 보건소 결과</h1><p>${R.no} · ${R.name} (교육용 분류, 진단 아님)</p>
-    <p>DXA로 쟀다면 분류가 바뀔 확률: 근육 ${pctTxt(r.pm)}, 체지방 ${pctTxt(r.pf)}</p>
-    ${withVals ? `<h2>내 수치는 어디쯤?</h2>${myGauges(current, r)}<h2>계산 과정</h2>${procHTML(current, r)}` : ''}
-    <h2>자료 출처 · 대상자 수 · 가중치 · 단위 · 기준 문헌</h2>${dataInfoTable()}<p><b>꼭 읽어 주세요.</b> ${POS_NOTICE}</p>
-    <h2>내가 모은 열쇠에 새겨진 제안</h2><ul>${cards.map(c=>`<li>[${c.lvl}] ${esc(c.text)}</li>`).join('')}</ul>
-    <h2>우리 사회의 4가지 문제</h2><ul>${ISSUES.map(x=>`<li><b>${x.k} ${x.name}</b> ${x.fact} ${x.why}</li>`).join('')}</ul>
-    <h2>보건소 3단계 실천 계획</h2>${LEVELS.map(L=>`<h3>${L.h}</h3><ul>${L.items.map(([t])=>`<li>${t}</li>`).join('')}</ul>`).join('')}
-    <p>${CONSULT}</p><h2>참고문헌</h2><ol>${Object.entries(REFS).map(([k,v])=>`<li value="${k}">${esc(v.t)}</li>`).join('')}</ol>
-    <p>${shareUrl()}</p>`;
-  setTimeout(()=>{ try { window.print(); } catch(e){ toast('인쇄를 열 수 없어요. 리포트 이미지를 저장해 주세요'); } }, 100);
-}
-function openShare(){
-  const saved = pushSheet();
-  openSheet(`<p class="eyebrow">SHARE</p><h2>링크로 공유</h2><p>이 게임 주소를 보내면 휴대폰에서도 바로 할 수 있어요.</p><p class="small" style="word-break:break-all">${shareUrl()}</p>
-    <div class="acts"><button class="btn ghost sm" id="shCopy">링크 복사</button><button class="btn ghost sm" id="shShare">공유하기</button></div>`, {close:true, onClose: saved ? ()=>popSheet(saved) : null});
-  $('shCopy').onclick = ()=>copyText(shareUrl(), '링크를 복사했어요');
-  $('shShare').onclick = async ()=>{ try { await navigator.share({title:'방탈출 게임: 인바디 미스터리', text:'집현전 보건소 방탈출 게임: 인바디 미스터리 · 숫자 너머 내 몸 바로알기', url:shareUrl()}); } catch(e){ copyText(shareUrl(), '공유 창 대신 링크를 복사했어요'); } };
-}
 function deliver(){
-  stage = 'end'; chapter('CHAPTER 11 · TAKE HOME', '결과 받아보기', '이미지·인쇄·텍스트로 결과를 가져가세요.'); pill('11 — 보건소 로비 · 결과 받아보기');
+  stage = 'end'; chapter('CHAPTER 11 · TAKE HOME', '결과 받아보기', '이미지·텍스트 파일로 결과를 가져가세요.'); pill('11 — 보건소 로비 · 결과 받아보기');
   openSheet(`<p class="eyebrow">CHAPTER 11 · TAKE HOME</p><h2>결과 받아보기</h2>
     <p class="small">예측 결과, 내가 모은 열쇠의 제안, 사회적 메시지, 다짐, 근거를 가져갈 수 있어요.</p>
     <label class="check"><input type="checkbox" id="withVals"> 내 측정값(근육지수·체지방률·BMI)도 포함하기</label>
-    <h3>저장·캡처</h3><div class="acts"><button class="btn" id="repImgBtn">리포트 이미지 만들기</button><button class="btn ghost" id="repPrint">인쇄 · PDF로 저장</button><button class="btn ghost" id="repCopy">내용 복사</button><button class="btn ghost" id="repShare">공유하기</button><button class="btn ghost" id="repTxt">텍스트 파일로 저장</button></div>
-    <div id="repWrap" hidden><img id="repImg" alt="결과 리포트 이미지" style="width:100%;border-radius:14px;margin-top:12px;border:1px solid var(--line)"><div class="acts"><button class="btn" id="repDl">이미지 내려받기</button><button class="btn ghost" id="repImgShare">이미지 공유</button></div><p class="small">내려받기가 안 되면 이미지를 길게 눌러 저장하세요.</p></div>
-    <h3>게임 링크</h3><p class="small" style="word-break:break-all">${shareUrl()}</p><button class="btn ghost sm" id="dlCopyLink">링크 복사</button>
+    <h3>저장·캡처</h3><div class="acts"><button class="btn" id="repImgBtn">리포트 이미지 만들기</button><button class="btn ghost" id="repTxt">텍스트 파일로 저장</button></div>
+    <div id="repWrap" hidden><img id="repImg" alt="결과 리포트 이미지" style="width:100%;border-radius:14px;margin-top:12px;border:1px solid var(--line)"><div class="acts"><button class="btn" id="repDl">이미지 내려받기</button></div><p class="small">내려받기가 안 되면 이미지를 길게 눌러 저장하세요.</p></div>
+    <h3>게임 링크</h3><p class="small" style="word-break:break-all">${shareUrl()}</p>
     <div class="nav"><button class="btn ghost" id="dvPrev">‹ 다짐으로</button><button class="btn ghost" id="dvNote">탐험 수첩</button><button class="btn" id="dvAgain">처음부터 다시</button></div>`, {wide:true, close:true, onClose:()=>{ objective('수고하셨어요! 보건소장님이나 간호사에게 가면 결과를 다시 받을 수 있어요.'); play(); }});
   let blob = null;
   $('repImgBtn').onclick = async ()=>{ const cv = await reportImage($('withVals').checked); const url = cv.toDataURL('image/png'); $('repImg').src = url; $('repWrap').hidden = false; cv.toBlob(b=>blob = b, 'image/png'); $('repWrap').scrollIntoView({behavior:'smooth', block:'start'}); };
-  $('repImgShare').onclick = async ()=>{ try { await navigator.share({files:[new File([blob], 'inbody-mystery-result.png', {type:'image/png'})], title:'방탈출 게임: 인바디 미스터리 결과'}); } catch(e){ toast('공유를 열 수 없어요. 이미지를 길게 눌러 저장해 주세요'); } };
   $('repDl').onclick = ()=>{ if (blob) saveFile('inbody-mystery-result.png', blob); else toast('잠시 후 다시 눌러 주세요'); };
   $('repTxt').onclick = ()=>saveFile('inbody-mystery-result.txt', reportText($('withVals').checked));
-  $('repPrint').onclick = ()=>printReport($('withVals').checked);
-  $('repCopy').onclick = ()=>copyText(reportText($('withVals').checked), '결과 내용을 복사했어요');
-  $('repShare').onclick = async ()=>{ try { await navigator.share({title:'방탈출 게임: 인바디 미스터리 결과', text:reportText($('withVals').checked)}); } catch(e){ copyText(reportText($('withVals').checked), '공유 창 대신 내용을 복사했어요'); } };
-  $('dlCopyLink').onclick = ()=>copyText(shareUrl(), '링크를 복사했어요');
   $('dvPrev').onclick = ()=>{ sheetOnClose = null; pledgeCard(); }; $('dvNote').onclick = ()=>openNotebook('cards');
   confirmBtn($('dvAgain'), ()=>{ sheetOnClose = null; closeSheet(); restart(); });
 }

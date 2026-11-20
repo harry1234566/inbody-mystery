@@ -109,7 +109,8 @@ function makePerson(o){
   const part = (r, ps, pl, ts, tl, x=0, y=0.02, z=-0.01) => add(new THREE.SphereGeometry(r, 30, 20, ps, pl, ts, tl), hm, x, y, z, head);
   const cap = (th, r=Rh) => part(r, 0, Math.PI*2, 0, th);
   const back = (th, r=Rh) => part(r, Math.PI, Math.PI, 0, th);
-  const st = o.style;
+  const st = o.hat==='none' ? o.style : 'hidden'; /* 모자를 쓰면 머리카락은 그리지 않음 */
+  if (st==='hidden' && !['bald','none'].includes(o.style)) back(1.85, R*1.02); /* 모자 아래로 밀어 넣은 짧은 뒷머리: 모자 밖으로 나오지 않음 */
   if (st==='short'){ cap(1.12); back(1.95); add(sph(0.16,14,10), hm, 0.1, 0.3, 0.24, head).scale.set(1.5,0.55,0.8); }
   if (st==='buzz'){ cap(1.2, R*1.02); back(1.85, R*1.02); }
   if (st==='part'){ cap(1.15); back(2.0); add(sph(0.2,14,10), hm, -0.15, 0.27, 0.22, head).scale.set(1.35,0.5,0.85); }

@@ -122,17 +122,17 @@ function roomHS(k){
   addHS({id:'exit', icon:'door', label:()=>`출구 · 🔑 ${R.qs.filter(id=>Q[id].solved).length}/4`, pos:[ROOM_DOOR_U, 3.35, -4.9], stand:[ROOM_DOOR_U, -3.75], look:[ROOM_DOOR_U,-5],
     lock:()=>!R.qs.every(id=>Q[id].solved), lockMsg:()=>'미션 4개를 풀어 열쇠를 모두 모으면 문이 열려요', main:()=>R.qs.every(id=>Q[id].solved), use:exitRoom});
 }
-function updateKeys(){ if (!roomKey) return; const n = ROOMS[roomKey].qs.filter(id=>Q[id].solved).length; [...$('keyChip').querySelectorAll('i')].forEach((el,i)=>el.classList.toggle('on', i<n));
-  if (DOORS.slots) DOORS.slots.forEach((m,i)=>{ m.color.copy(lin(i<n ? '#f2c14e' : '#bfb49a')); m.emissive = lin(i<n ? '#8a6420' : '#000000'); }); }
+function updateKeys(){ if (!roomKey) return; const qs = ROOMS[roomKey].qs; [...$('keyChip').querySelectorAll('i')].forEach((el,i)=>{ const on = !!(qs[i] && Q[qs[i]].solved); el.classList.toggle('on', on); el.title = `${i+1}번 미션 열쇠${on?' (획득)':''}`; });
+  if (DOORS.slots) DOORS.slots.forEach((m,i)=>{ const on = !!(qs[i] && Q[qs[i]].solved); m.color.copy(lin(on ? '#f2c14e' : '#bfb49a')); m.emissive = lin(on ? '#8a6420' : '#000000'); }); }
 async function exitRoom(){
   mode = 'busy'; toast('🔑 열쇠 4개가 맞춰졌어요. 문이 열립니다!'); await sleep(500); await openDoor(DOORS.exit, 1); await walkTo(ROOM_DOOR_U, -4.75); await fade(true);
   const k = roomKey; place = 'lobby'; buildLobby(); lobbyHS(); const d = DOORS[k]; d.open = 1; d.piv.rotation.y = -1.35; const L = d.side==='L';
   player.root.position.set(L ? -7.2 : d.u, 0, L ? d.u : -5.2); player.facing = L ? Math.PI/2 : 0; player.path = [];
-  doctor.root.visible = true; $('keyChip').hidden = true; stage = 'doctor'; CAM.init = false; updateCamera(0); await fade(false);
+  doctor.root.visible = true; blockC(-2.4, -1.7, 0.28, 0.28); computeGrid(); $('keyChip').hidden = true; stage = 'doctor'; CAM.init = false; updateCamera(0); await fade(false);
   chapter('CHAPTER 07 · THE PROPOSAL', '제안서 전달', '보건소장님께 정책 제안서를 전해 주세요.'); pill('07 — 보건소 로비 · 보건소장실 앞');
   await walkTo(L ? -6.2 : d.u, L ? d.u : -4.3); openDoor(d, 0);
   await poofTransform();
-  await say('간호사', '펑! 열쇠 4개를 모두 모은 덕분에 한결 건강해진 모습이에요. 꾸준한 실천으로 만들 수 있는 <b>미래의 나</b>예요. 다만 진짜 건강은 겉모습이 아니라 근력, 허리둘레, 혈액 지표처럼 몸 안을 함께 봐야 알 수 있어요. 이제 보건소장님께 제안서를 전해 주세요.', {btns:['제안서 들고 가기']}); play();
+  await say('간호사', '열쇠 4개를 모두 모은 덕분에 한결 건강해진 모습이에요. 꾸준한 실천으로 만들 수 있는 <b>미래의 나</b>예요. 다만 진짜 건강은 겉모습이 아니라 근력, 허리둘레, 혈액 지표처럼 몸 안을 함께 봐야 알 수 있어요. 이제 보건소장님께 제안서를 전해 주세요.', {btns:['제안서 들고 가기']}); play();
 }
 
 /* ================= 마무리: 내 결과 → 내 제안서 → 사회문제 → 보건소 실천 계획 → 팀 ================= */
@@ -182,11 +182,10 @@ async function ending(){
 function survey(){
   stage = 'end'; player.wave = true; chapter('CHAPTER 09 · YOUR VOICE', '체험 평가', '1분이면 끝나요.'); pill('09 — 보건소 로비 · 체험 평가');
   const opt = (k, arr, h) => `<div class="chips${h?' h':''}" data-k="${k}">${arr.map((a,i)=>`<button type="button" data-i="${i}" aria-pressed="${sv[k]===i}">${a}</button>`).join('')}</div>`;
-  openSheet(`<p class="eyebrow">CHAPTER 09 · YOUR VOICE</p><h2>체험 평가 (1분)</h2><p class="small">팀이 퀴즈 난이도와 메시지 전달을 개선하는 데 써요. 건강 수치는 들어가지 않아요.</p>
-    <div class="qlab">1. 퀴즈 난이도는 어땠나요?</div>${opt('level',['쉬웠어요','적당했어요','어려웠어요'],true)}
-    <div class="qlab">2. 인바디와 DXA 결과가 다를 수 있는 이유를 이해했나요?</div>${opt('under',['잘 이해했어요','조금 이해했어요','잘 모르겠어요'],true)}
-    <div class="qlab">3. 가장 기억에 남는 사회문제는?</div>${opt('msg',ISSUES.map(x=>x.k+' '+x.name))}
-    <div class="qlab">4. 가장 필요하다고 생각하는 변화는?</div>${opt('act',['개인: 같은 조건에서 재고, 근력·허리둘레 함께 보기','지역사회: 보건소 체성분 검사에 근력 검사·운동교실 연계','보건정책: 결과지 표준 안내와 검진 상담 연계'])}
+  openSheet(`<p class="eyebrow">CHAPTER 09 · YOUR VOICE</p><h2>체험 평가 (1분)</h2><p class="small">오늘 알게 된 것을 스스로 점검해 보는 문항이에요. 응답은 어디에도 저장·전송되지 않아요.</p>
+    <div class="qlab">1. 인바디와 DXA 결과가 다를 수 있는 이유를 이해했나요?</div>${opt('under',['잘 이해했어요','조금 이해했어요','잘 모르겠어요'],true)}
+    <div class="qlab">2. 가장 기억에 남는 사회문제는?</div>${opt('msg',ISSUES.map(x=>x.k+' '+x.name))}
+    <div class="qlab">3. 가장 필요하다고 생각하는 변화는?</div>${opt('act',['개인: 같은 조건에서 재고, 근력·허리둘레 함께 보기','지역사회: 보건소 체성분 검사에 근력 검사·운동교실 연계','보건정책: 결과지 표준 안내와 검진 상담 연계'])}
     <div class="nav"><button class="btn ghost" id="svPrev">‹ 이전</button><button class="btn" id="svDone">다짐 고르기 ›</button></div>`, {wide:true});
   $('panel').querySelectorAll('.chips').forEach(g=>g.querySelectorAll('button').forEach(b=>b.onclick=()=>{ g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); sv[g.dataset.k] = +b.dataset.i; }));
   $('svPrev').onclick = ()=>pager(4, survey); $('svDone').onclick = pledgeCard;
@@ -194,19 +193,19 @@ function survey(){
 function recordText(){
   const sec = Math.round((performance.now()-(log.start||performance.now()))/1000), m = Math.floor(sec/60), s = sec%60;
   const L = ['쉬움','적당','어려움'], U = ['잘 이해','조금 이해','모름'], A = ['개인','지역사회','보건정책'];
-  return `[방탈출 게임: 인바디 미스터리 체험 기록] 방: ${ROOMS[roomKey].name}${demo?'(체험 모드)':''} | 소요 ${m}분 ${s}초 | 퀴즈 ${log.quizzes}개 중 첫 시도 정답 ${log.firstTry}개, 오답 ${log.wrong}회 | 단서 ${notes.length}개 | 난이도: ${sv.level==null?'-':L[sv.level]} | 이해: ${sv.under==null?'-':U[sv.under]} | 기억에 남는 문제: ${sv.msg==null?'-':ISSUES[sv.msg].name} | 필요한 변화: ${sv.act==null?'-':A[sv.act]} | 문항별 시도·초: ${log.hints.map(h=>`${h.id}:${h.tries}/${h.sec}s`).join(',')}`;
+  return `[방탈출 게임: 인바디 미스터리 체험 기록] 방: ${ROOMS[roomKey].name}${demo?'(체험 모드)':''} | 소요 ${m}분 ${s}초 | 퀴즈 ${log.quizzes}개 중 첫 시도 정답 ${log.firstTry}개, 오답 ${log.wrong}회 | 단서 ${notes.length}개 | 이해: ${sv.under==null?'-':U[sv.under]} | 기억에 남는 문제: ${sv.msg==null?'-':ISSUES[sv.msg].name} | 필요한 변화: ${sv.act==null?'-':A[sv.act]} | 문항별 시도·초: ${log.hints.map(h=>`${h.id}:${h.tries}/${h.sec}s`).join(',')}`;
 }
 const pledged = new Set([0]);
 function pledgeCard(){
   const R = ROOMS[roomKey];
   chapter('CHAPTER 10 · MY PLEDGE', '나의 다짐', '다짐을 고르고 결과를 받아 가세요.'); pill('10 — 보건소 로비 · 나의 다짐');
   openSheet(`<p class="eyebrow">CHAPTER 10 · MY PLEDGE</p><h2>나의 건강관리 다짐</h2><p class="small">제안서의 "개인" 단계는 방문자님의 실천에서 시작돼요. "${R.camp}"에 함께할 다짐을 골라 주세요.</p><div class="chips" id="chips"></div>
-    <details class="box"><summary>체험 기록 보기 (팀 파일럿 테스트용)</summary><p class="small" id="recTxt" style="margin:6px 0;word-break:break-all"></p><button class="btn ghost sm" id="copyRec">기록 복사</button></details>
+    <details class="box"><summary>체험 기록 보기 (팀 파일럿 테스트용)</summary><p class="small" id="recTxt" style="margin:6px 0;word-break:break-all"></p><button class="btn ghost sm" id="copyRec">기록 텍스트 파일로 저장</button></details>
     <div class="nav"><button class="btn ghost" id="plPrev">‹ 이전</button><button class="btn" id="plNext">결과 받아보기 ›</button></div>`, {wide:true});
   R.pledges.forEach((p,i)=>{ const b = document.createElement('button'); b.textContent = p; b.setAttribute('aria-pressed', String(pledged.has(i)));
     b.onclick = ()=>{ pledged.has(i) ? pledged.delete(i) : pledged.add(i); b.setAttribute('aria-pressed', String(pledged.has(i))); }; $('chips').appendChild(b); });
   $('recTxt').textContent = recordText();
-  $('copyRec').onclick = ()=>copyText(recordText(), '기록을 복사했어요');
+  $('copyRec').onclick = ()=>saveFile('inbody-mystery-record.txt', recordText());
   $('plPrev').onclick = survey; $('plNext').onclick = ()=>{ if (!pledged.size){ toast('다짐을 하나 이상 골라 주세요'); return; } deliver(); };
 }
 function restart(){

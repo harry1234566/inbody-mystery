@@ -20,6 +20,7 @@ function rebuildPlayer(){
   const pos = player ? player.root.position.clone() : new THREE.Vector3(-1.5,0,3.2), f = player ? player.facing : Math.PI/4;
   if (player && player.root.parent) player.root.parent.remove(player.root);
   player = makePerson(avOpts()); player.root.position.copy(pos); player.facing = f; player.path = []; world.add(player.root);
+  if (window.__PV && window.__PV.on) window.__PV.set();
 }
 
 /* ================= 화면 도우미 ================= */
@@ -119,7 +120,7 @@ function setSafe(){
   const top = MOBILE ? 150 : 120;
   let b = MOBILE ? 50 : 80, r = 20;
   if (!d.hidden) b = Math.max(b, d.offsetHeight + (MOBILE ? 20 : 90));
-  if (!side.hidden){ if (MOBILE) b = side.offsetHeight + 20; else r = side.offsetWidth + 40; }
+  if (!side.hidden){ if (MOBILE) b = side.offsetHeight + 20; else { const pv = document.getElementById('avPrev'); r = side.offsetWidth + 40 + (pv && !pv.hidden ? pv.offsetWidth + 20 : 0); } }
   CAM.safe = {t: side.hidden ? top : (MOBILE ? 70 : 100), b, l: MOBILE ? 10 : 30, r, fitB: MOBILE ? b : 24};
 }
 new ResizeObserver(()=>setSafe()).observe($('dlg'));

@@ -41,9 +41,7 @@ function renderInfo(){
 function showInfo(){ $('infoCard').hidden = false; $('infoBtn').hidden = false; infoOpen = !MOBILE; renderInfo(); }
 $('infoBtn').onclick = ()=>{ const saved = pushSheet(); openSheet(`<p class="eyebrow">MY CARD</p><h2>내 정보와 데이터의 의미</h2>${infoBody(true)}`, {close:true, wide:true, onClose: saved ? ()=>popSheet(saved) : null}); bindInfo($('panel')); };
 
-/* ================= 결과 받아보기: 이미지 · 인쇄 · 텍스트 · 공유 ================= */
-function copyText(t, ok){ const fb = ()=>{ const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); toast(ok); } catch(e){ toast('복사하지 못했어요. 길게 눌러 복사해 주세요'); } ta.remove(); };
-  try { navigator.clipboard.writeText(t).then(()=>toast(ok), fb); } catch(e){ fb(); } }
+/* ================= 결과 받아보기: 리포트 이미지 · 텍스트 파일 ================= */
 function confirmBtn(b, fn){ let armed = false; const orig = b.textContent; b.onclick = ()=>{ if (!armed){ armed = true; b.textContent = '한 번 더 누르면 처음부터 시작해요'; setTimeout(()=>{ armed = false; b.textContent = orig; }, 4000); } else fn(); }; }
 function reportText(withVals){
   const R = ROOMS[roomKey || (result && result.room) || 'balance'], r = result || predict(current), L = [];
@@ -89,44 +87,19 @@ async function reportImage(withVals){
   g.fillStyle = '#8a948d'; g.font = `500 22px ${FONT}`; g.fillText('교육·캠페인용이며 의학적 진단이 아닙니다', W/2, y+150); g.fillText('TEAM 집현전 · 성균관대 2026-2 URP', W/2, y+190); g.textAlign = 'left';
   return cv;
 }
-function printReport(withVals){
-  const r = result || predict(current), R = ROOMS[roomKey || r.room];
-  $('printArea').innerHTML = `<h1>방탈출 게임: 인바디 미스터리 · 집현전 보건소 결과</h1><p>${R.no} · ${R.name} (교육용 분류, 진단 아님)</p>
-    <p>DXA로 쟀다면 분류가 바뀔 확률: 근육 ${pctTxt(r.pm)}, 체지방 ${pctTxt(r.pf)}</p>
-    ${withVals ? `<h2>내 수치는 어디쯤?</h2>${myGauges(current, r)}<h2>계산 과정</h2>${procHTML(current, r)}` : ''}
-    <h2>자료 출처 · 대상자 수 · 가중치 · 단위 · 기준 문헌</h2>${dataInfoTable()}<p><b>꼭 읽어 주세요.</b> ${POS_NOTICE}</p>
-    <h2>내가 모은 열쇠에 새겨진 제안</h2><ul>${cards.map(c=>`<li>[${c.lvl}] ${esc(c.text)}</li>`).join('')}</ul>
-    <h2>우리 사회의 4가지 문제</h2><ul>${ISSUES.map(x=>`<li><b>${x.k} ${x.name}</b> ${x.fact} ${x.why}</li>`).join('')}</ul>
-    <h2>보건소 3단계 실천 계획</h2>${LEVELS.map(L=>`<h3>${L.h}</h3><ul>${L.items.map(([t])=>`<li>${t}</li>`).join('')}</ul>`).join('')}
-    <p>${CONSULT}</p><h2>참고문헌</h2><ol>${Object.entries(REFS).map(([k,v])=>`<li value="${k}">${esc(v.t)}</li>`).join('')}</ol>
-    <p>${shareUrl()}</p>`;
-  setTimeout(()=>{ try { window.print(); } catch(e){ toast('인쇄를 열 수 없어요. 리포트 이미지를 저장해 주세요'); } }, 100);
-}
-function openShare(){
-  const saved = pushSheet();
-  openSheet(`<p class="eyebrow">SHARE</p><h2>링크로 공유</h2><p>이 게임 주소를 보내면 휴대폰에서도 바로 할 수 있어요.</p><p class="small" style="word-break:break-all">${shareUrl()}</p>
-    <div class="acts"><button class="btn ghost sm" id="shCopy">링크 복사</button><button class="btn ghost sm" id="shShare">공유하기</button></div>`, {close:true, onClose: saved ? ()=>popSheet(saved) : null});
-  $('shCopy').onclick = ()=>copyText(shareUrl(), '링크를 복사했어요');
-  $('shShare').onclick = async ()=>{ try { await navigator.share({title:'방탈출 게임: 인바디 미스터리', text:'집현전 보건소 방탈출 게임: 인바디 미스터리 · 숫자 너머 내 몸 바로알기', url:shareUrl()}); } catch(e){ copyText(shareUrl(), '공유 창 대신 링크를 복사했어요'); } };
-}
 function deliver(){
-  stage = 'end'; chapter('CHAPTER 11 · TAKE HOME', '결과 받아보기', '이미지·인쇄·텍스트로 결과를 가져가세요.'); pill('11 — 보건소 로비 · 결과 받아보기');
+  stage = 'end'; chapter('CHAPTER 11 · TAKE HOME', '결과 받아보기', '이미지·텍스트 파일로 결과를 가져가세요.'); pill('11 — 보건소 로비 · 결과 받아보기');
   openSheet(`<p class="eyebrow">CHAPTER 11 · TAKE HOME</p><h2>결과 받아보기</h2>
     <p class="small">예측 결과, 내가 모은 열쇠의 제안, 사회적 메시지, 다짐, 근거를 가져갈 수 있어요.</p>
     <label class="check"><input type="checkbox" id="withVals"> 내 측정값(근육지수·체지방률·BMI)도 포함하기</label>
-    <h3>저장·캡처</h3><div class="acts"><button class="btn" id="repImgBtn">리포트 이미지 만들기</button><button class="btn ghost" id="repPrint">인쇄 · PDF로 저장</button><button class="btn ghost" id="repCopy">내용 복사</button><button class="btn ghost" id="repShare">공유하기</button><button class="btn ghost" id="repTxt">텍스트 파일로 저장</button></div>
-    <div id="repWrap" hidden><img id="repImg" alt="결과 리포트 이미지" style="width:100%;border-radius:14px;margin-top:12px;border:1px solid var(--line)"><div class="acts"><button class="btn" id="repDl">이미지 내려받기</button><button class="btn ghost" id="repImgShare">이미지 공유</button></div><p class="small">내려받기가 안 되면 이미지를 길게 눌러 저장하세요.</p></div>
-    <h3>게임 링크</h3><p class="small" style="word-break:break-all">${shareUrl()}</p><button class="btn ghost sm" id="dlCopyLink">링크 복사</button>
+    <h3>저장·캡처</h3><div class="acts"><button class="btn" id="repImgBtn">리포트 이미지 만들기</button><button class="btn ghost" id="repTxt">텍스트 파일로 저장</button></div>
+    <div id="repWrap" hidden><img id="repImg" alt="결과 리포트 이미지" style="width:100%;border-radius:14px;margin-top:12px;border:1px solid var(--line)"><div class="acts"><button class="btn" id="repDl">이미지 내려받기</button></div><p class="small">내려받기가 안 되면 이미지를 길게 눌러 저장하세요.</p></div>
+    <h3>게임 링크</h3><p class="small" style="word-break:break-all">${shareUrl()}</p>
     <div class="nav"><button class="btn ghost" id="dvPrev">‹ 다짐으로</button><button class="btn ghost" id="dvNote">탐험 수첩</button><button class="btn" id="dvAgain">처음부터 다시</button></div>`, {wide:true, close:true, onClose:()=>{ objective('수고하셨어요! 보건소장님이나 간호사에게 가면 결과를 다시 받을 수 있어요.'); play(); }});
   let blob = null;
   $('repImgBtn').onclick = async ()=>{ const cv = await reportImage($('withVals').checked); const url = cv.toDataURL('image/png'); $('repImg').src = url; $('repWrap').hidden = false; cv.toBlob(b=>blob = b, 'image/png'); $('repWrap').scrollIntoView({behavior:'smooth', block:'start'}); };
-  $('repImgShare').onclick = async ()=>{ try { await navigator.share({files:[new File([blob], 'inbody-mystery-result.png', {type:'image/png'})], title:'방탈출 게임: 인바디 미스터리 결과'}); } catch(e){ toast('공유를 열 수 없어요. 이미지를 길게 눌러 저장해 주세요'); } };
   $('repDl').onclick = ()=>{ if (blob) saveFile('inbody-mystery-result.png', blob); else toast('잠시 후 다시 눌러 주세요'); };
   $('repTxt').onclick = ()=>saveFile('inbody-mystery-result.txt', reportText($('withVals').checked));
-  $('repPrint').onclick = ()=>printReport($('withVals').checked);
-  $('repCopy').onclick = ()=>copyText(reportText($('withVals').checked), '결과 내용을 복사했어요');
-  $('repShare').onclick = async ()=>{ try { await navigator.share({title:'방탈출 게임: 인바디 미스터리 결과', text:reportText($('withVals').checked)}); } catch(e){ copyText(reportText($('withVals').checked), '공유 창 대신 내용을 복사했어요'); } };
-  $('dlCopyLink').onclick = ()=>copyText(shareUrl(), '링크를 복사했어요');
   $('dvPrev').onclick = ()=>{ sheetOnClose = null; pledgeCard(); }; $('dvNote').onclick = ()=>openNotebook('cards');
   confirmBtn($('dvAgain'), ()=>{ sheetOnClose = null; closeSheet(); restart(); });
 }

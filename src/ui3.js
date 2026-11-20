@@ -54,11 +54,10 @@ $('helpBtn').onclick = ()=>{
     <div class="qlab">글씨 크기</div><div class="seg" style="margin:6px 0 10px">${FZ.map(([z,l],i)=>`<button type="button" data-fz="${i}" aria-pressed="${i===fzI}">${l}</button>`).join('')}</div>
     <label class="check"><input type="checkbox" id="ttsChk" ${ttsOn?'checked':''}> 음성 안내 켜기 (화면의 글을 읽어 줘요)</label>
     <label class="check"><input type="checkbox" id="povChk" ${povEnabled?'checked':''}> 조사할 때 캐릭터 시점으로 가까이 보기</label>
-    <div class="acts"><button class="btn ghost" id="hpShare">링크로 공유</button><button class="btn ghost" id="hpAgain">처음부터 다시 하기</button></div>
+    <div class="acts"><button class="btn ghost" id="hpAgain">처음부터 다시 하기</button></div>
     <p class="small">교육·캠페인용 체험이며 의학적 진단이 아닙니다. 입력값은 저장하지 않아요. TEAM 집현전 · 성균관대학교 2026-2 융합연구학점제</p>`, {close:true, onClose: saved ? ()=>popSheet(saved) : null});
   $('panel').querySelectorAll('[data-fz]').forEach(b=>b.onclick = ()=>setFz(+b.dataset.fz));
   $('povChk').onchange = e=>{ povEnabled = e.target.checked; };
-  $('hpShare').onclick = ()=>openShare();
   confirmBtn($('hpAgain'), ()=>{ sheetOnClose = null; closeSheet(); restart(); });
   $('ttsChk').onchange = e=>{ if (!ttsOK){ toast('이 브라우저에서는 음성 안내를 지원하지 않아요'); e.target.checked = false; return; } ttsOn = e.target.checked; if (ttsOn) speak('음성 안내를 켰어요.'); else try { speechSynthesis.cancel(); } catch(_){} };
 };
@@ -122,6 +121,28 @@ function step(dt){
     player.walking = true; player.facing = lerpAngle(player.facing, Math.atan2(mx, mz), Math.min(1, dt*14)); marker.visible = false; }
   else if (!stepPath(dt)){ player.walking = false; marker.visible = false; }
 }
+/* ================= 캐릭터 꾸미기 미리보기 (확대·천천히 회전) ================= */
+const PV = (()=>{
+  const wrap = document.createElement('div'); wrap.id = 'avPrev'; wrap.hidden = true; wrap.setAttribute('aria-hidden','true');
+  wrap.innerHTML = '<span>미리보기</span>'; document.body.appendChild(wrap);
+  const r = new THREE.WebGLRenderer({antialias:true, alpha:true}); r.setPixelRatio(Math.min(window.devicePixelRatio||1, 2)); r.outputEncoding = THREE.sRGBEncoding; r.setClearColor(0x000000, 0); wrap.appendChild(r.domElement);
+  const sc = new THREE.Scene(); sc.add(new THREE.HemisphereLight(0xfffdf6, 0xe4dccb, 0.95));
+  const k1 = new THREE.DirectionalLight(0xfff1dc, 0.7); k1.position.set(-3, 6, 5); sc.add(k1);
+  const k2 = new THREE.DirectionalLight(0xe8f0ff, 0.28); k2.position.set(4, 3, -4); sc.add(k2);
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.05, 48), new THREE.MeshStandardMaterial({color:lin('#e6dfcf'), roughness:0.95})); disc.position.y = -0.03; sc.add(disc);
+  const cam = new THREE.PerspectiveCamera(28, 1, 0.1, 60); let person = null, ang = -0.5, top = 2, mid = 1;
+  const api = { on:false, wrap,
+    set(){ if (person) sc.remove(person.root); person = makePerson(avOpts()); person.facing = ang; sc.add(person.root);
+      person.root.rotation.y = 0; person.root.updateMatrixWorld(true); const bb = new THREE.Box3().setFromObject(person.root); top = bb.max.y; mid = top/2; },
+    show(v){ api.on = !!v; wrap.hidden = !v; document.body.classList.toggle('avon', !!v); if (v) api.set(); },
+    frame(dt, now){ if (!api.on || !person) return; const w = wrap.clientWidth, h = wrap.clientHeight; if (!w || !h) return;
+      const pr = r.getPixelRatio(); if (r.domElement.width !== Math.round(w*pr) || r.domElement.height !== Math.round(h*pr)) r.setSize(w, h, false);
+      ang += dt*0.55; person.facing = ang; person.walking = false; animPerson(person, dt, now);
+      cam.aspect = w/h; const need = Math.max(top*1.18, (top*1.18)*0.62/cam.aspect); const d = (need/2)/Math.tan(cam.fov*Math.PI/360);
+      cam.position.set(0, mid + top*0.08, d); cam.lookAt(0, mid, 0); cam.updateProjectionMatrix(); r.render(sc, cam); }
+  };
+  window.__PV = api; return api;
+})();
 function frame(){
   const dt = Math.min(clock3.getDelta(), 0.05); T += dt; const now = performance.now();
   for (let i=tasks.length-1;i>=0;i--){ const k = tasks[i]; k.t += dt; const p = Math.min(1, k.t/k.dur); k.fn(p); if (p>=1){ tasks.splice(i,1); k.res(); } }
@@ -136,7 +157,7 @@ function frame(){
   if (nurse && player && place==='lobby'){ nurse.facing = lerpAngle(nurse.facing, Math.atan2(player.root.position.x-nurse.root.position.x, player.root.position.z-nurse.root.position.z)*0.5, dt*2); }
   if (marker.visible) marker.material.opacity = 0.5 + Math.sin(T*6)*0.25;
   updateCamera(dt); updateHS();
-  updatePOV(); renderer.render(scene, POV.on ? PERSP : camera); requestAnimationFrame(frame);
+  updatePOV(); renderer.render(scene, POV.on ? PERSP : camera); PV.frame(dt, now); requestAnimationFrame(frame);
 }
 
 /* ================= 시작 ================= */
@@ -146,4 +167,4 @@ PIC.nurse = portrait(NPC_N); PIC.doctor = portrait(NPC_D);
 $('hud').hidden = false; setSafe(); CAM.init = false;
 frame();
 setTimeout(()=>{ $('loading').classList.add('off'); setTimeout(()=>$('loading').hidden = true, 700); introHint(); }, 500);
-window.__dbg = {poof:()=>poofTransform(), posterSheet:()=>{ const ks = Object.keys(POSTERS); const cw = 420, ch = 504; const c = document.createElement('canvas'); c.width = cw*6; c.height = ch*Math.ceil(ks.length/6); const g = c.getContext('2d'); ks.forEach((k,i)=>{ const P = POSTERS[k]; g.save(); g.translate((i%6)*cw, Math.floor(i/6)*ch); g.fillStyle = PK.paper; g.fillRect(0,0,cw-6,ch-6); g.fillStyle = '#5f9e86'; g.fillRect(0,0,cw-6,ch*0.15); pText(g, P.t, cw/2, ch*0.075, ch*0.06, '#fff', 800); P.draw(g, cw*0.06, ch*0.2, cw*0.88, ch*0.56); pText(g, P.cap, cw/2, ch*0.86, ch*0.035, PK.ink, 700); pText(g, '근거: '+P.src, cw/2, ch*0.94, ch*0.028, PK.mut, 500); g.restore(); }); return c.toDataURL(); }, scene, PERSP, POV, build:k=>{ buildRoom(k); roomHS(k); roomKey=k; place='room'; stage='room'; mode='play'; dlgClose(); player.root.position.set(ROOM_DOOR_U,0,-3.6); CAM.init=false; }, forceRoom:k=>{ result = predict(current); result.room = k; }, Q, get stage(){return stage;}, set stage(v){stage=v;}, get result(){return result;}, get current(){return current;}, set current(v){current=v;}, player:()=>player, HS:()=>HS, goUse, useDemo, quiz, enterRoom, exitRoom, ending, showResult, notes, CAM, walkTo, openNotebook, get mode(){return mode;}, set mode(v){mode=v;}, get demo(){return demo;}, get HIST(){return HIST;}, setFz};
+window.__dbg = {poof:()=>poofTransform(), posterSheet:()=>{ const ks = Object.keys(POSTERS); const cw = 420, ch = 504; const c = document.createElement('canvas'); c.width = cw*6; c.height = ch*Math.ceil(ks.length/6); const g = c.getContext('2d'); ks.forEach((k,i)=>{ const P = POSTERS[k]; g.save(); g.translate((i%6)*cw, Math.floor(i/6)*ch); g.fillStyle = PK.paper; g.fillRect(0,0,cw-6,ch-6); g.fillStyle = '#5f9e86'; g.fillRect(0,0,cw-6,ch*0.15); pText(g, P.t, cw/2, ch*0.075, ch*0.06, '#fff', 800); P.draw(g, cw*0.06, ch*0.2, cw*0.88, ch*0.56); pText(g, P.cap, cw/2, ch*0.86, ch*0.035, PK.ink, 700); pText(g, '근거: '+P.src, cw/2, ch*0.94, ch*0.028, PK.mut, 500); g.restore(); }); return c.toDataURL(); }, scene, PERSP, POV, build:k=>{ buildRoom(k); roomHS(k); roomKey=k; place='room'; stage='room'; mode='play'; dlgClose(); player.root.position.set(ROOM_DOOR_U,0,-3.6); CAM.init=false; }, forceRoom:k=>{ result = predict(current); result.room = k; }, Q, get stage(){return stage;}, set stage(v){stage=v;}, get result(){return result;}, get current(){return current;}, set current(v){current=v;}, player:()=>player, HS:()=>HS, goUse, useDemo, quiz, enterRoom, updateKeys, deliver, walkable, get roomKey(){return roomKey;}, set roomKey(v){roomKey=v;}, exitRoom, ending, showResult, notes, CAM, walkTo, openNotebook, get mode(){return mode;}, set mode(v){mode=v;}, get demo(){return demo;}, get HIST(){return HIST;}, setFz};

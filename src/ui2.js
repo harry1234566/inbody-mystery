@@ -70,11 +70,11 @@ function toAvatar(){
   const band = Number.isFinite(current.age) ? bandOf(current.age) : '40-49';
   Object.assign(av, {style: sexA===1 ? 'short' : 'bob', hair: band==='65+' ? 6 : band==='50-64' ? 4 : 1, wrinkle: band==='65+', beard:'none', bottom:'pants'});
   rebuildPlayer(); player.root.position.set(-0.7, 0, 1.0); player.path = []; player.facing = Math.PI/4;
-  avTab = 'body'; renderAv(); $('side').hidden = false; dlgClose(); setSafe(); CAM.mode = 'close';
+  avTab = 'body'; renderAv(); $('side').hidden = false; PV.show(true); dlgClose(); setSafe(); CAM.mode = 'close';
   chapter('CHAPTER 03 · MY CARD', '진료 카드 만들기', '나를 닮은 모습으로 꾸며 보세요.'); pill('03 — 보건소 로비 · 진료 카드');
 }
-$('avBack').onclick = ()=>{ $('side').hidden = true; CAM.mode = 'room'; setSafe(); stage = 'intro'; if (demo) openConsent(); else openReception(); };
-$('avDone').onclick = ()=>{ $('side').hidden = true; CAM.mode = 'room'; setSafe(); PIC.me = portrait(avOpts()); toWaiting(); };
+$('avBack').onclick = ()=>{ $('side').hidden = true; PV.show(false); CAM.mode = 'room'; setSafe(); stage = 'intro'; if (demo) openConsent(); else openReception(); };
+$('avDone').onclick = ()=>{ $('side').hidden = true; PV.show(false); CAM.mode = 'room'; setSafe(); PIC.me = portrait(avOpts()); toWaiting(); };
 
 /* ================= 조사 지점 ================= */
 const ICON = {
